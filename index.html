@@ -1,0 +1,2306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이든X학원 문제풀기 시스템</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a2b4a;--teal:#0d7e8a;--sky:#e8f5f7;--gold:#f0a500;
+  --red:#d94040;--green:#2a9d5c;--gray:#f4f5f7;--border:#d0dde5;
+  --text:#222a35;--mute:#6b7a8d;--r:10px;
+  --font:'Apple SD Gothic Neo','Nanum Gothic',sans-serif;
+}
+body{font-family:var(--font);background:var(--gray);color:var(--text);min-height:100vh}
+.screen{display:none}.screen.active{display:block}
+.btn{padding:11px 22px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-teal{background:var(--teal);color:#fff}
+.btn-gold{background:var(--gold);color:#1a1a1a}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:#fff;color:var(--navy);border:1.5px solid var(--border)}
+.btn-green{background:var(--green);color:#fff}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-full{width:100%}
+.btn:disabled{opacity:.45;cursor:default;transform:none;box-shadow:none}
+.card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:24px}
+.card-sm{padding:16px}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-hard{background:#fdecea;color:var(--red)}
+.badge-mid{background:#fff7e6;color:#b06a00}
+.badge-easy{background:#e8f8ee;color:var(--green)}
+.badge-sub{background:#ede9fe;color:#6d28d9}
+
+/* ── LOGIN ── */
+#screen-login{min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,#0d3d5a 60%,#124a3a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 16px}
+#screen-login.active{display:flex}
+.login-logo{font-size:12px;font-weight:700;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+.login-title{font-size:clamp(22px,5vw,34px);font-weight:900;color:#fff;text-align:center;margin-bottom:4px}
+.login-sub{font-size:14px;color:#8ab4c9;margin-bottom:30px;text-align:center}
+.login-box{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px 32px;width:100%;max-width:420px}
+.login-box h3{color:#fff;font-size:14px;font-weight:700;margin-bottom:18px}
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.form-row input{width:100%;padding:10px 14px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:14px;outline:none;transition:border .2s}
+.form-row input::placeholder{color:rgba(255,255,255,.35)}
+.form-row input:focus{border-color:var(--gold)}
+.login-err{color:#ff8a8a;font-size:12px;margin-top:8px;min-height:18px}
+.divider{display:flex;align-items:center;gap:10px;margin:20px 0}
+.divider span{flex:1;height:1px;background:rgba(255,255,255,.15)}
+.divider p{font-size:11px;color:rgba(255,255,255,.4);white-space:nowrap}
+.admin-toggle{color:rgba(255,255,255,.4);font-size:11.5px;text-align:center;cursor:pointer;margin-top:14px;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:6px}
+.admin-toggle:hover{color:var(--gold)}
+.admin-toggle::before,.admin-toggle::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.15)}
+
+/* ── 시험지 카드 모드 버튼 ── */
+.qi-mode-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.qi-btn{padding:10px 0;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.2px}
+.qi-btn:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(0,0,0,.18)}
+.qi-btn-all{background:linear-gradient(135deg,var(--gold) 0%,#e09000 100%);color:#1a1200}
+.qi-btn-all:hover{background:linear-gradient(135deg,#ffc020 0%,var(--gold) 100%)}
+.qi-btn-single{background:linear-gradient(135deg,var(--teal) 0%,#0a6672 100%);color:#fff}
+.qi-btn-single:hover{background:linear-gradient(135deg,#10929f 0%,var(--teal) 100%)}
+.qi-btn-icon{font-size:15px}
+
+/* ── 개별풀기 화면 ── */
+#screen-single{max-width:720px;margin:0 auto;padding:24px 16px}
+#screen-single.active{display:block}
+.single-topbar{background:linear-gradient(135deg,var(--teal) 0%,#0a5f6a 100%);color:#fff;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.stb-title{font-size:14px;font-weight:800;letter-spacing:.3px}
+.stb-info{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px}
+.s-progress-wrap{height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:10px;width:100%;overflow:hidden}
+.s-progress-fill{height:100%;background:#fff;border-radius:2px;transition:width .35s}
+.s-palette-wrap{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.s-palette-label{font-size:10px;font-weight:800;color:var(--mute);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.s-palette{display:flex;flex-wrap:wrap;gap:5px}
+.sp-btn{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border);background:var(--gray);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.sp-btn:hover{background:var(--sky)}.sp-btn.s-active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.sp-btn.s-ok{background:#e0f7ea;border-color:var(--green);color:var(--green)}
+.sp-btn.s-wrong{background:#fde8e8;border-color:var(--red);color:var(--red)}
+.sp-btn.s-partial{background:#fff7e6;border-color:#b06a00;color:#b06a00}
+.single-nav-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.snb-pos{font-size:13px;font-weight:700;color:var(--navy)}
+.snb-btns{display:flex;gap:8px}
+.single-q-card{background:#fff;border:2px solid var(--border);border-radius:14px;padding:22px;margin-bottom:14px;transition:border-color .2s}
+.single-q-card.s-correct{border-color:var(--green);background:#f2fbf6}
+.single-q-card.s-wrong{border-color:var(--red);background:#fdf3f3}
+.single-q-card.s-partial{border-color:var(--gold);background:#fffbf0}
+.sq-num-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sq-num-lbl{font-size:12px;font-weight:800;color:var(--teal);letter-spacing:.5px}
+.sq-text{font-size:14px;line-height:1.8;margin-bottom:14px;white-space:pre-wrap}
+.sq-box{background:var(--sky);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:10px 13px;margin-bottom:12px;font-size:13px;line-height:1.75;white-space:pre-wrap}
+.sq-box strong{display:block;font-size:10px;color:var(--navy);font-weight:800;letter-spacing:1px;margin-bottom:4px;text-transform:uppercase}
+.single-opts{list-style:none}
+.single-opts li{margin-bottom:7px}
+.single-opt-btn{width:100%;text-align:left;padding:11px 15px;background:var(--gray);border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;cursor:pointer;transition:all .18s;line-height:1.55}
+.single-opt-btn:hover:not(:disabled){background:#ddf0f3;border-color:var(--teal);transform:translateX(3px)}
+.single-opt-btn.s-sel{background:#ddeeff;border-color:#4499dd;transform:translateX(3px)}
+.single-opt-btn.s-cor{background:#e0f7ea;border-color:var(--green);font-weight:700}
+.single-opt-btn.s-err{background:#fde8e8;border-color:var(--red)}
+.single-opt-btn:disabled{cursor:default;transform:none}
+.single-subj-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;outline:none;transition:border .2s;resize:vertical;min-height:80px;font-family:var(--font)}
+.single-subj-input:focus{border-color:var(--teal)}
+.single-subj-input.s-cor{border-color:var(--green);background:#f2fbf6}
+.single-subj-input.s-err{border-color:var(--red);background:#fdf3f3}
+.single-subj-input.s-partial{border-color:var(--gold);background:#fffbf0}
+.single-exp-box{margin-top:12px;padding:12px 14px;background:#fffbf0;border:1px solid #f0d070;border-radius:9px;font-size:13px;line-height:1.75;display:none}
+.single-exp-box.show{display:block}
+.sep-lbl{font-size:10px;font-weight:800;color:var(--navy);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.single-action-bar{display:flex;gap:10px;flex-wrap:wrap}
+.single-action-bar .btn{flex:1;min-width:120px;padding:12px}
+
+/* ── 피드백 오버레이 (개별풀기) ── */
+.feedback-big{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:998}
+.feedback-emoji{font-size:80px;animation:popIn .45s ease forwards}
+.feedback-msg{margin-top:16px;background:rgba(0,0,0,.82);color:#fff;padding:12px 32px;border-radius:30px;font-size:18px;font-weight:800;animation:slideUp .4s ease forwards}
+
+/* ── 로그인 개선 ── */
+.login-box{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:30px 34px;width:100%;max-width:430px;backdrop-filter:blur(8px)}
+.login-box h3{color:#fff;font-size:15px;font-weight:800;margin-bottom:20px;letter-spacing:.3px}
+
+/* ── 시험지 카드 세련 ── */
+.quiz-item{cursor:default}
+.quiz-item:hover{transform:none;box-shadow:none;border-color:var(--border)}
+.qi-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.qi-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--navy),#2a4a7a);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.qi-info{flex:1}
+
+/* ── DASHBOARD ── */
+#screen-dashboard{max-width:960px;margin:0 auto;padding:28px 18px}
+#screen-dashboard.active{display:block}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px}
+.top-bar .tb-left h1{font-size:20px;font-weight:800;color:var(--navy)}
+.top-bar .tb-left p{font-size:13px;color:var(--mute);margin-top:2px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:18px;text-align:center}
+.stat-card .s-num{font-size:28px;font-weight:900}
+.stat-card .s-lbl{font-size:11px;color:var(--mute);margin-top:3px}
+.stat-card.total .s-num{color:var(--navy)}.stat-card.avg .s-num{color:var(--teal)}.stat-card.best .s-num{color:var(--gold)}
+.quiz-list-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:14px}
+.quiz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:28px}
+.quiz-item{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .2s}
+.quiz-item:hover{border-color:var(--teal);box-shadow:0 4px 16px rgba(13,126,138,.12);transform:translateY(-2px)}
+.qi-subject{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--teal);text-transform:uppercase;margin-bottom:6px}
+.qi-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.qi-meta{font-size:12px;color:var(--mute);display:flex;gap:10px;flex-wrap:wrap}
+.qi-score{margin-top:10px;padding:8px 12px;border-radius:7px;font-size:12px;font-weight:700;text-align:center}
+.qi-score.done{background:#e0f7ea;color:var(--green)}.qi-score.undone{background:var(--gray);color:var(--mute)}
+.history-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:14px}
+.history-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--border)}
+.history-table th{background:var(--navy);color:#fff;padding:10px 14px;text-align:left;font-size:12px}
+.history-table td{padding:10px 14px;border-bottom:1px solid var(--border)}
+.history-table tr:last-child td{border-bottom:none}
+.history-table tr:hover td{background:var(--sky)}
+
+/* ── QUIZ ── */
+#screen-quiz{max-width:900px;margin:0 auto;padding:24px 16px}
+#screen-quiz.active{display:block}
+.quiz-topbar{background:var(--navy);color:#fff;border-radius:var(--r);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.qtb-title{font-size:14px;font-weight:700}.qtb-info{font-size:12px;color:#8ab4c9}
+.progress-wrap{height:5px;background:rgba(255,255,255,.15);border-radius:3px;margin-top:8px;width:100%;overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
+.q-palette{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.pal-btn{width:34px;height:34px;border-radius:6px;border:1.5px solid var(--border);background:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.pal-btn:hover{background:var(--sky)}.pal-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.pal-btn.ok{background:#e0f7ea;border-color:var(--green);color:var(--green)}
+.pal-btn.wrong{background:#fde8e8;border-color:var(--red);color:var(--red)}
+.pal-btn.partial{background:#fff7e6;border-color:#b06a00;color:#b06a00}
+.quiz-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.quiz-cols{grid-template-columns:1fr}}
+.q-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:14px;position:relative;transition:border-color .2s}
+.q-card.correct{border-color:var(--green);background:#f2fbf6}
+.q-card.wrong{border-color:var(--red);background:#fdf3f3}
+.q-card.partial{border-color:var(--gold);background:#fffbf0}
+.q-num-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.q-num-lbl{font-size:10px;font-weight:800;color:var(--mute);letter-spacing:1px}
+.q-text{font-size:12.5px;line-height:1.7;margin-bottom:9px;white-space:pre-wrap}
+.q-box{background:var(--sky);border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:12px;line-height:1.7;white-space:pre-wrap}
+.q-box strong{display:block;font-size:10px;color:var(--navy);font-weight:700;margin-bottom:2px}
+.opts-list{list-style:none}
+.opts-list li{margin-bottom:4px}
+.opt-btn{width:100%;text-align:left;padding:7px 10px;background:var(--gray);border:1.5px solid var(--border);border-radius:7px;font-size:12px;cursor:pointer;transition:all .15s;line-height:1.5}
+.opt-btn:hover:not(:disabled){background:#ddf0f3;border-color:var(--teal)}
+.opt-btn.sel{background:#ddeeff;border-color:#4499dd}
+.opt-btn.cor{background:#e0f7ea;border-color:var(--green);font-weight:700}
+.opt-btn.err{background:#fde8e8;border-color:var(--red)}
+.opt-btn:disabled{cursor:default}
+.subj-input{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;outline:none;transition:border .2s;resize:vertical;min-height:55px;font-family:var(--font)}
+.subj-input:focus{border-color:var(--teal)}
+.subj-input.cor{border-color:var(--green);background:#f2fbf6}
+.subj-input.err{border-color:var(--red);background:#fdf3f3}
+.subj-input.partial{border-color:var(--gold);background:#fffbf0}
+.exp-box{margin-top:8px;padding:8px 10px;background:#fffbf0;border:1px solid #f0d070;border-radius:7px;font-size:11.5px;line-height:1.7;display:none}
+.exp-box.show{display:block}
+.ep-lbl{font-size:10px;font-weight:800;color:var(--navy);letter-spacing:1px;margin-bottom:3px}
+.ai-spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin-right:5px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.submit-zone{margin-top:22px;text-align:center;padding-bottom:30px}
+
+/* ── RESULT ── */
+#screen-result{max-width:880px;margin:0 auto;padding:28px 16px}
+#screen-result.active{display:block}
+.result-hero{background:var(--navy);color:#fff;border-radius:16px;padding:32px;text-align:center;margin-bottom:22px}
+.r-emoji{font-size:48px;margin-bottom:8px}.r-score{font-size:46px;font-weight:900;color:var(--gold)}.r-sub{font-size:14px;color:#8ab4c9;margin-top:4px}
+.r-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.rs-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.rs-num{font-size:26px;font-weight:900}.rs-lbl{font-size:11px;color:var(--mute);margin-top:3px}
+.rs-card.c .rs-num{color:var(--green)}.rs-card.w .rs-num{color:var(--red)}.rs-card.p .rs-num{color:var(--gold)}
+.wrong-section-title{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--navy)}
+.wrong-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+@media(max-width:560px){.wrong-grid{grid-template-columns:1fr}}
+.wr-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:12px}
+.wr-num{font-size:10px;font-weight:800;color:var(--mute);margin-bottom:3px}
+.wr-text{font-size:12px;line-height:1.6;margin-bottom:5px}
+.wr-ans .my{color:var(--red);font-size:11px}.wr-ans .cor{color:var(--green);font-size:11px;font-weight:700}
+.wr-exp{margin-top:6px;padding:6px 9px;background:#fffbf0;border:1px solid #f0d070;border-radius:6px;font-size:11px;line-height:1.7}
+.result-btns{display:flex;gap:10px;flex-wrap:wrap}
+.result-btns .btn{flex:1;min-width:130px}
+
+/* ── ADMIN ── */
+#screen-admin{max-width:1020px;margin:0 auto;padding:28px 18px}
+#screen-admin.active{display:block}
+.admin-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--mute)}
+.tab-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* 파일 업로드 영역 */
+.upload-zone{border:2.5px dashed var(--border);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:all .2s;background:#fff;margin-bottom:16px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--teal);background:var(--sky)}
+.upload-zone .uz-icon{font-size:36px;margin-bottom:10px}
+.upload-zone h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.upload-zone p{font-size:12px;color:var(--mute);line-height:1.6}
+.upload-zone .uz-formats{margin-top:10px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.format-badge{background:var(--gray);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--navy)}
+.upload-progress{background:var(--sky);border:1px solid var(--teal);border-radius:10px;padding:16px;margin-bottom:14px;display:none}
+.upload-progress.show{display:block}
+.up-bar-wrap{height:8px;background:rgba(13,126,138,.2);border-radius:4px;margin:10px 0;overflow:hidden}
+.up-bar-fill{height:100%;background:var(--teal);border-radius:4px;transition:width .3s}
+.up-log{font-size:12px;color:var(--teal);font-weight:600}
+.parse-preview{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px;display:none}
+.parse-preview.show{display:block}
+.pp-title{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px}
+.pp-list{max-height:260px;overflow-y:auto}
+.pp-item{padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;display:flex;align-items:flex-start;gap:8px}
+.pp-item:last-child{border-bottom:none}
+.pp-num{background:var(--navy);color:#fff;border-radius:5px;min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.pp-text{flex:1;line-height:1.5;color:var(--text)}
+.pp-badge{flex-shrink:0}
+
+/* 시험지 폼 */
+.quiz-builder{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.qb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.qb-header h3{font-size:13px;font-weight:800;color:var(--navy)}
+.qb-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.qb-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:10px;font-weight:700;color:var(--mute);letter-spacing:1px;text-transform:uppercase}
+.form-group input,.form-group select,.form-group textarea{padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;outline:none;transition:border .2s;font-family:var(--font)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal)}
+.form-group textarea{resize:vertical;min-height:60px}
+.opts-builder .ob-row{display:flex;gap:7px;align-items:center;margin-bottom:5px}
+.opts-builder .ob-row input[type=text]{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;outline:none}
+.opts-builder .ob-row input[type=text]:focus{border-color:var(--teal)}
+.opts-builder .ob-row .cor-check{width:18px;height:18px;cursor:pointer;accent-color:var(--green);flex-shrink:0}
+.add-opt-btn{color:var(--teal);font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding:3px 0}
+
+/* 점수 테이블 */
+.score-table{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--border)}
+.score-table th{background:var(--navy);color:#fff;padding:9px 12px;text-align:left;font-size:11px}
+.score-table td{padding:9px 12px;border-bottom:1px solid var(--border)}
+.score-table tr:hover td{background:var(--sky)}
+.score-table tr:last-child td{border-bottom:none}
+.score-pill{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700}
+.sp-high{background:#e0f7ea;color:var(--green)}.sp-mid{background:#fff7e6;color:#b06a00}.sp-low{background:#fde8e8;color:var(--red)}
+
+/* 모달 */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.hidden{display:none}
+.modal-box{background:#fff;border-radius:14px;padding:26px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto}
+.modal-box h2{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:14px}
+.modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--mute)}
+
+/* 피드백 */
+.fb-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:999}
+.fb-bubble{font-size:64px;animation:popIn .5s ease forwards}
+@keyframes popIn{0%{transform:scale(.3) rotate(-10deg);opacity:0}60%{transform:scale(1.2) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+.fb-text{position:fixed;bottom:28%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:11px 26px;border-radius:28px;font-size:17px;font-weight:800;pointer-events:none;z-index:998;animation:slideUp .4s ease forwards}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(18px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.confetti-p{position:fixed;pointer-events:none;z-index:997;border-radius:2px;animation:cFall var(--dur) ease forwards}
+@keyframes cFall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+@media print{
+  body{background:#fff}
+  .quiz-topbar,.q-palette,.submit-zone,.result-btns,.top-bar,
+  #screen-login,#screen-dashboard,#screen-admin,#screen-result,#screen-single{display:none!important}
+  #screen-quiz{display:block!important;padding:8mm;max-width:100%}
+  .quiz-cols{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+  .q-card{break-inside:avoid;border:1px solid #ccc;page-break-inside:avoid}
+  .exp-box{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ 로그인 ══ -->
+<div id="screen-login" class="screen active">
+  <div class="login-logo">🌿 이든X학원</div>
+  <div class="login-title">문제풀기 시스템</div>
+  <div class="login-sub">Eden Quiz Platform</div>
+  <div class="login-box" id="student-login-box">
+    <h3>🎓 학생 로그인</h3>
+    <div class="form-row"><label>이름</label><input type="text" id="inp-name" placeholder="이름 입력" autocomplete="off"></div>
+    <div class="form-row"><label>비밀번호</label><input type="password" id="inp-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')loginStudent()"></div>
+    <div class="login-err" id="login-err"></div>
+    <button class="btn btn-gold btn-full" style="margin-top:4px" onclick="loginStudent()">로그인</button>
+    <div class="divider"><span></span><p>또는</p><span></span></div>
+    <div class="admin-toggle" onclick="toggleAdminBox()">🔐 관리자 로그인</div>
+  </div>
+  <div class="login-box" id="admin-login-box" style="display:none;margin-top:14px">
+    <h3>🔐 관리자 로그인</h3>
+    <div class="form-row"><label>아이디</label><input type="text" id="inp-admin-id" placeholder="아이디 입력" autocomplete="off"></div>
+    <div class="form-row"><label>비밀번호</label><input type="password" id="inp-admin-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
+    <div class="login-err" id="admin-err"></div>
+    <button class="btn btn-navy btn-full" style="margin-top:4px" onclick="loginAdmin()">관리자 로그인</button>
+  </div>
+</div>
+
+<!-- ══ 학생 대시보드 ══ -->
+<div id="screen-dashboard" class="screen">
+  <div style="max-width:960px;margin:0 auto;padding:28px 18px">
+    <div class="top-bar">
+      <div class="tb-left"><h1>안녕하세요, <span id="dash-name"></span>님! 👋</h1><p>이든X학원 문제풀기 시스템</p></div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card total"><div class="s-num" id="stat-total">0</div><div class="s-lbl">📝 응시 횟수</div></div>
+      <div class="stat-card avg"><div class="s-num" id="stat-avg">-</div><div class="s-lbl">📊 평균 점수</div></div>
+      <div class="stat-card best"><div class="s-num" id="stat-best">-</div><div class="s-lbl">🏆 최고 점수</div></div>
+    </div>
+    <div class="quiz-list-title">📚 풀 수 있는 시험지</div>
+    <div class="quiz-grid" id="quiz-grid"></div>
+    <div class="history-title">📋 응시 기록</div>
+    <table class="history-table">
+      <thead><tr><th>시험명</th><th>응시일시</th><th>점수</th><th>정답/전체</th><th>오답</th></tr></thead>
+      <tbody id="history-body"><tr><td colspan="5" style="text-align:center;color:var(--mute);padding:20px">응시 기록이 없습니다.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ 퀴즈 화면 ══ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-topbar">
+    <div style="flex:1">
+      <div class="qtb-title" id="qt-title">시험명</div>
+      <div class="qtb-info" id="qt-info"></div>
+      <div class="progress-wrap"><div class="progress-fill" id="q-progress" style="width:0%"></div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-left:12px">
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ 인쇄</button>
+      <button class="btn btn-ghost btn-sm" onclick="backToDash()">← 나가기</button>
+    </div>
+  </div>
+  <div class="q-palette" id="q-palette"></div>
+  <div class="quiz-cols" id="quiz-body"></div>
+  <div class="submit-zone">
+    <button class="btn btn-navy" id="btn-submit" style="padding:14px 44px;font-size:15px" onclick="submitQuiz()">✅ 제출하기</button>
+  </div>
+</div>
+
+
+<!-- ══ 개별 풀기 화면 ══ -->
+<div id="screen-single" class="screen">
+  <div class="single-topbar">
+    <div style="flex:1">
+      <div class="stb-title" id="st-title">개별 문제 풀기</div>
+      <div class="stb-info" id="st-info"></div>
+      <div class="s-progress-wrap"><div class="s-progress-fill" id="s-progress" style="width:0%"></div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-left:14px">
+      <button class="btn btn-ghost btn-sm" onclick="backToDash()" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.2)">← 나가기</button>
+    </div>
+  </div>
+
+  <div class="s-palette-wrap">
+    <div class="s-palette-label">문항 선택</div>
+    <div class="s-palette" id="s-palette"></div>
+  </div>
+
+  <div class="single-nav-bar">
+    <div class="snb-pos" id="snb-pos">1 / 60</div>
+    <div class="snb-btns">
+      <button class="btn btn-ghost btn-sm" id="btn-s-prev" onclick="sNav(-1)">◀ 이전</button>
+      <button class="btn btn-ghost btn-sm" id="btn-s-next" onclick="sNav(1)">다음 ▶</button>
+    </div>
+  </div>
+
+  <div class="single-q-card" id="single-q-card"></div>
+
+  <div class="single-exp-box" id="single-exp-box">
+    <div class="sep-lbl">💡 해설</div>
+    <div id="single-exp-text"></div>
+  </div>
+
+  <div class="single-action-bar" id="single-action-bar">
+    <button class="btn btn-ghost btn-sm" onclick="backToDash()" style="flex:0;padding:12px 16px">🏠</button>
+    <button class="btn btn-ghost" id="btn-s-retry" onclick="singleRetry()" style="display:none">🔄 다시 풀기</button>
+    <button class="btn btn-navy" id="btn-s-check" onclick="singleCheck()">✅ 정답 확인</button>
+    <button class="btn btn-gold" id="btn-s-next2" onclick="sNav(1)">다음 문제 ▶</button>
+  </div>
+</div>
+
+<!-- ══ 결과 화면 ══ -->
+<div id="screen-result" class="screen">
+  <div style="max-width:880px;margin:0 auto;padding:28px 16px">
+    <div class="result-hero">
+      <div class="r-emoji" id="r-emoji">🎉</div>
+      <div class="r-score" id="r-score">0점</div>
+      <div class="r-sub" id="r-sub"></div>
+    </div>
+    <div class="r-stats">
+      <div class="rs-card c"><div class="rs-num" id="rs-c">0</div><div class="rs-lbl">✅ 정답</div></div>
+      <div class="rs-card w"><div class="rs-num" id="rs-w">0</div><div class="rs-lbl">❌ 오답</div></div>
+      <div class="rs-card p"><div class="rs-num" id="rs-p">0</div><div class="rs-lbl">🤔 부분점수</div></div>
+    </div>
+    <div class="wrong-section-title">❌ 틀린 / 감점 문항 상세</div>
+    <div class="wrong-grid" id="wrong-grid"></div>
+    <div class="result-btns">
+      <button class="btn btn-ghost" onclick="backToDash()">🏠 대시보드</button>
+      <button class="btn btn-teal" onclick="retryAll()">🔄 전체 다시 풀기</button>
+      <button class="btn btn-red" id="btn-retry-wrong" onclick="retryWrong()">❌ 틀린 문제만</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 관리자 화면 ══ -->
+<div id="screen-admin" class="screen">
+  <div class="top-bar">
+    <div class="tb-left"><h1>⚙️ 관리자 패널</h1><p>이든X학원 문제풀기 시스템 관리</p></div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
+  </div>
+  <div class="admin-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-quizzes',this)">📋 시험지 관리</button>
+    <button class="tab-btn" onclick="switchTab('tab-upload',this)">📂 파일 업로드</button>
+    <button class="tab-btn" onclick="switchTab('tab-new',this)">✏️ 직접 만들기</button>
+    <button class="tab-btn" onclick="switchTab('tab-scores',this)">📊 학생 점수</button>
+    <button class="tab-btn" onclick="switchTab('tab-students',this)">👥 학생 관리</button>
+  </div>
+
+  <!-- 탭1: 시험지 목록 -->
+  <div class="tab-panel active" id="tab-quizzes"><div id="admin-quiz-list"></div></div>
+
+  <!-- 탭2: 파일 업로드 -->
+  <div class="tab-panel" id="tab-upload">
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:6px">📂 문제 파일 업로드</h3>
+      <p style="font-size:12px;color:var(--mute);margin-bottom:16px;line-height:1.7">
+        문서 파일(.txt, .md, .json)이나 JSON 형식 파일을 업로드하면 AI가 자동으로 문제를 파싱합니다.<br>
+        또는 아래 텍스트 박스에 문제를 직접 붙여넣기 하세요.
+      </p>
+      <!-- 드래그앤드롭 업로드 존 -->
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleFileDrop(event)">
+        <div class="uz-icon">📄</div>
+        <h3>파일을 드래그하거나 클릭하여 업로드</h3>
+        <p>문제가 담긴 텍스트 파일을 업로드하면 AI가 자동으로 분석합니다</p>
+        <div class="uz-formats">
+          <span class="format-badge">.txt</span>
+          <span class="format-badge">.md</span>
+          <span class="format-badge">.json</span>
+        </div>
+      </div>
+      <input type="file" id="file-input" accept=".txt,.md,.json" style="display:none" onchange="handleFileSelect(event)">
+
+      <!-- 텍스트 직접 입력 -->
+      <div style="margin-top:16px">
+        <label style="font-size:12px;font-weight:700;color:var(--navy);display:block;margin-bottom:8px">📝 또는 문제를 직접 붙여넣기</label>
+        <textarea id="paste-input" style="width:100%;height:180px;padding:12px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;font-family:var(--font);resize:vertical;outline:none;line-height:1.7" placeholder="문제 내용을 여기에 붙여넣으세요...&#10;&#10;지원 형식:&#10;• 마크다운 형식 (## 제목, 번호. 내용)&#10;• 일반 텍스트 형식 (1번, 2번... 또는 [1], [2]...)&#10;• JSON 배열 형식"></textarea>
+      </div>
+
+      <!-- 업로드 진행 -->
+      <div class="upload-progress" id="upload-progress">
+        <div class="up-log" id="up-log">AI가 문제를 분석 중입니다...</div>
+        <div class="up-bar-wrap"><div class="up-bar-fill" id="up-bar" style="width:0%"></div></div>
+      </div>
+
+      <!-- 미리보기 -->
+      <div class="parse-preview" id="parse-preview">
+        <div class="pp-title">✅ 파싱 완료 — <span id="pp-count">0</span>문항 인식됨</div>
+        <div class="pp-list" id="pp-list"></div>
+      </div>
+
+      <!-- 시험지 정보 입력 (파싱 후 표시) -->
+      <div id="upload-quiz-form" style="display:none;margin-top:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="form-group"><label>시험 제목</label><input type="text" id="up-title" placeholder="예: 2학기 중간고사 과학"></div>
+          <div class="form-group"><label>과목</label><input type="text" id="up-subject" placeholder="예: 과학, 영어, 수학"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div class="form-group"><label>학년</label>
+            <select id="up-grade"><option>중학교 1학년</option><option selected>중학교 2학년</option><option>중학교 3학년</option><option>고등학교 1학년</option><option>전체</option></select>
+          </div>
+          <div class="form-group"><label>제한 시간 (분, 0=무제한)</label><input type="number" id="up-time" value="0" min="0"></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-teal" onclick="parseAndPreview()">🔍 AI 분석</button>
+          <button class="btn btn-gold" id="btn-save-upload" onclick="saveUploadedQuiz()" style="display:none">💾 시험지 저장</button>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap" id="upload-action-btns">
+        <button class="btn btn-teal" onclick="parseAndPreview()">🔍 AI 분석 시작</button>
+      </div>
+    </div>
+
+    <!-- 업로드 형식 가이드 -->
+    <div class="card card-sm">
+      <h3 style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px">📌 지원 입력 형식 예시</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">▶ 마크다운 / 일반 텍스트</div>
+          <pre style="background:var(--gray);border-radius:7px;padding:10px;font-size:11px;line-height:1.7;overflow-x:auto">1. 세포의 기본 단위는?
+① 세포  ② 조직  ③ 기관
+④ 기관계  ⑤ 개체
+정답: ①
+해설: 세포=생물체의 기본 단위
+
+2. 아밀레이스가 분해하는 것은?
+(주관식)
+정답: 녹말(엿당으로 분해)
+키워드: 녹말, 엿당</pre>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">▶ JSON 형식</div>
+          <pre style="background:var(--gray);border-radius:7px;padding:10px;font-size:11px;line-height:1.7;overflow-x:auto">[
+  {
+    "type": "mc",
+    "diff": "중",
+    "text": "문제 내용",
+    "opts": ["① A","② B","③ C"],
+    "answer": 0,
+    "exp": "해설 내용"
+  },
+  {
+    "type": "subj",
+    "diff": "상",
+    "text": "주관식 문제",
+    "keywords": ["키워드1"],
+    "exp": "모범 답안"
+  }
+]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 탭3: 직접 만들기 -->
+  <div class="tab-panel" id="tab-new">
+    <div class="card" style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:12px">📝 시험지 정보</h3>
+      <div class="qb-row">
+        <div class="form-group"><label>시험 제목</label><input type="text" id="new-title" placeholder="예: 2학기 중간고사 영어 어휘"></div>
+        <div class="form-group"><label>과목</label><input type="text" id="new-subject" placeholder="예: 영어, 과학, 수학"></div>
+      </div>
+      <div class="qb-row">
+        <div class="form-group"><label>학년</label>
+          <select id="new-grade"><option>중학교 1학년</option><option>중학교 2학년</option><option>중학교 3학년</option><option>고등학교 1학년</option><option>전체</option></select>
+        </div>
+        <div class="form-group"><label>제한 시간 (분)</label><input type="number" id="new-time" value="0" min="0"></div>
+      </div>
+    </div>
+    <div id="questions-builder"></div>
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+      <button class="btn btn-teal" onclick="addQuestion('mc')">➕ 객관식 추가</button>
+      <button class="btn btn-ghost" onclick="addQuestion('subj')">➕ 주관식 추가</button>
+    </div>
+    <button class="btn btn-gold" style="padding:14px 40px;font-size:15px" onclick="saveQuiz()">💾 시험지 저장</button>
+  </div>
+
+  <!-- 탭4: 학생 점수 -->
+  <div class="tab-panel" id="tab-scores">
+    <div style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <select id="score-quiz-filter" onchange="renderScoreTable()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px"><option value="">전체 시험</option></select>
+      <button class="btn btn-ghost btn-sm" onclick="exportScores()">📥 CSV 내보내기</button>
+    </div>
+    <table class="score-table">
+      <thead><tr><th>학생</th><th>시험명</th><th>점수</th><th>정답/전체</th><th>응시일시</th></tr></thead>
+      <tbody id="score-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- 탭5: 학생 관리 -->
+  <div class="tab-panel" id="tab-students">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h3 style="font-size:14px;font-weight:800;color:var(--navy)">등록 학생 목록</h3>
+        <button class="btn btn-teal btn-sm" onclick="openModal('add-student-modal')">➕ 학생 추가</button>
+      </div>
+      <table class="score-table">
+        <thead><tr><th>#</th><th>이름</th><th>비밀번호</th><th>총 응시</th><th>평균 점수</th><th>관리</th></tr></thead>
+        <tbody id="students-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 학생 추가 모달 -->
+<div class="modal-backdrop hidden" id="add-student-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('add-student-modal')">✕</button>
+    <h2>👤 학생 추가</h2>
+    <div class="form-group" style="margin-bottom:12px"><label>이름</label><input type="text" id="new-stu-name" placeholder="학생 이름"></div>
+    <div class="form-group" style="margin-bottom:16px"><label>비밀번호</label><input type="text" id="new-stu-pw" placeholder="비밀번호 (숫자 6자리 권장)"></div>
+    <div style="display:flex;gap:10px"><button class="btn btn-ghost" onclick="closeModal('add-student-modal')">취소</button><button class="btn btn-teal" onclick="addStudent()">추가</button></div>
+  </div>
+</div>
+
+<script>
+/* ━━━━ 60문항 데이터 ━━━━ */
+const SCIENCE_QUIZ_60 = [
+  {
+    "id": "q001",
+    "type": "mc",
+    "diff": "상",
+    "text": "다음은 미지의 시료 A~D에 대해 영양소 검출 실험을 수행한 결과이다.\n• 시료 A: 아이오딘-아이오딘화 칼륨 용액 → 청람색\n• 시료 B: 5% NaOH + 1% 황산 구리(Ⅱ) 수용액 → 보라색\n• 시료 C: 베네딕트 용액 + 가열 → 황적색\n• 시료 D: 수단 Ⅲ 용액 → 선홍색\n이에 대한 설명으로 옳은 것만을 보기에서 있는 대로 고른 것은?",
+    "box": "ㄱ. 시료 A에 들어 있는 영양소는 입안에서 침 아밀레이스에 의해 최종 분해 산물로 완전히 분해된다.\nㄴ. 시료 B에 들어 있는 영양소는 주로 몸을 구성하며, 세포 호흡의 에너지원으로도 사용된다.\nㄷ. 시료 C의 검출 반응은 가열 과정을 거치지 않아도 빠르게 일어난다.\nㄹ. 시료 D의 영양소가 소장에서 최종 분해되면 모세 혈관으로 직접 흡수된다.",
+    "opts": [
+      "① ㄱ",
+      "② ㄴ",
+      "③ ㄱ, ㄷ",
+      "④ ㄴ, ㄹ",
+      "⑤ ㄷ, ㄹ"
+    ],
+    "answer": 1,
+    "exp": "A=녹말, B=단백질, C=포도당, D=지방. ㄴ만 옳음. ㄱ: 침 아밀레이스는 엿당까지만 분해(완전 분해 ✗). ㄷ: 베네딕트 반응은 80~90℃ 가열 필수. ㄹ: 지방 분해 산물은 암죽관으로 흡수."
+  },
+  {
+    "id": "q002",
+    "type": "mc",
+    "diff": "상",
+    "text": "녹말 소화 실험을 위해 4개의 시험관 A~D를 다음과 같이 준비하고 37℃ 물에 10분간 담가 두었다.\n• 시험관 A: 묽은 녹말 용액 5mL + 증류수 5mL\n• 시험관 B: 묽은 녹말 용액 5mL + 끓이지 않은 침 용액 5mL\n• 시험관 C: 묽은 녹말 용액 5mL + 100℃로 가열 후 식힌 침 용액 5mL\n• 시험관 D: 묽은 녹말 용액 5mL + 끓이지 않은 침 용액 5mL + 묽은 염산 몇 방울\n베네딕트 반응에서 황적색을 나타내는 시험관만을 있는 대로 고른 것은?",
+    "opts": [
+      "① A",
+      "② B",
+      "③ B, C",
+      "④ C, D",
+      "⑤ B, C, D"
+    ],
+    "answer": 1,
+    "exp": "B만 황적색. A: 침 없어 녹말 미분해. C: 100℃ 가열로 아밀레이스(단백질) 변성·파괴. D: 묽은 염산으로 강산성이 되어 아밀레이스 작용 억제. B만 37℃에서 아밀레이스 정상 작동→엿당 생성→베네딕트 황적색."
+  },
+  {
+    "id": "q003",
+    "type": "mc",
+    "diff": "상",
+    "text": "다음은 동물의 몸 구성 단계에 대한 학생들의 대화이다.\n• 철수: \"위(Stomach)는 여러 조직이 모여 고유한 소화 기능을 수행하므로 '기관' 단계에 해당해.\"\n• 영희: \"우리가 흔히 먹는 삼겹살(살코기와 지방층)은 여러 근육 조직과 결합 조직이 섞여 있으므로 그 자체로 독립된 하나의 '기관'이야.\"\n• 민수: \"소화계는 위, 소장, 간, 이자 등 관련된 기능을 하는 기관들이 모인 '기관계' 단계로, 식물체에는 존재하지 않아.\"\n올바른 설명을 한 학생만을 있는 대로 고른 것은?",
+    "opts": [
+      "① 철수",
+      "② 영희",
+      "③ 철수, 민수",
+      "④ 영희, 민수",
+      "⑤ 철수, 영희, 민수"
+    ],
+    "answer": 2,
+    "exp": "철수·민수가 옳음. 영희 오답: 삼겹살은 여러 조직이 섞여 있으나 독립된 고유 생리 기능을 수행하는 완결된 기관이 아님. 식물에는 기관계 단계가 없고 조직계가 있음."
+  },
+  {
+    "id": "q004",
+    "type": "mc",
+    "diff": "상",
+    "text": "위(Stomach)에서 일어나는 단백질 소화 작용에 대한 설명으로 옳지 않은 것은?",
+    "opts": [
+      "① 위샘에서 분비되는 위액에는 소화 효소인 펩신과 염산이 포함되어 있다.",
+      "② 염산은 펩신의 작용을 돕고, 음식물에 섞여 들어온 세균을 살균한다.",
+      "③ 위에서 단백질은 최종 분해 산물인 아미노산으로 완전히 분해된다.",
+      "④ 입에서 소화되지 못하고 위로 들어온 녹말은 위에서 화학적으로 분해되지 않는다.",
+      "⑤ 위액의 염산에 의해 위 안은 강한 산성을 띠므로, 침 아밀레이스의 작용이 중단된다."
+    ],
+    "answer": 2,
+    "exp": "③이 오답. 위에서 펩신은 단백질을 중간 단계(펩톤 등)까지만 분해. 최종 분해 산물인 아미노산으로의 완전한 분해는 소장에서 이루어진다."
+  },
+  {
+    "id": "q005",
+    "type": "mc",
+    "diff": "상",
+    "text": "지방의 소화 과정에서 '쓸개즙'과 '라이페이스'의 역할을 비교한 설명으로 가장 타당한 것은?",
+    "opts": [
+      "① 쓸개즙과 라이페이스는 모두 이자에서 합성되어 소장으로 분비된다.",
+      "② 쓸개즙은 소화 효소를 포함하고 있어 지방을 지방산으로 화학적 분해한다.",
+      "③ 쓸개즙은 지방 덩어리를 작은 알갱이로 만들어 라이페이스의 화학적 작용을 돕는다.",
+      "④ 라이페이스가 없어도 쓸개즙만 있으면 지방의 최종 분해가 완결된다.",
+      "⑤ 쓸개즙은 암죽관으로 흡수되고, 라이페이스는 모세 혈관으로 흡수된다."
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 쓸개즙은 간에서 생성, 소화 효소 없음, 지방 유화(기계적 보조)로 라이페이스 작용 면적을 넓혀줌. 라이페이스(이자 분비)가 화학적 소화 담당."
+  },
+  {
+    "id": "q006",
+    "type": "mc",
+    "diff": "상",
+    "text": "소장 융털을 통한 영양소의 흡수 및 이동 경로에 대한 설명으로 옳은 것은?",
+    "opts": [
+      "① 포도당과 아미노산은 융털의 암죽관으로 흡수된다.",
+      "② 지방산과 모노글리세리드는 융털의 모세 혈관으로 흡수된다.",
+      "③ 수용성 영양소는 암죽관을 거쳐 림프관을 지나 심장으로 들어간다.",
+      "④ 모세 혈관으로 흡수된 영양소는 간을 거치면서 당원(글리코젠) 저장 등의 조절을 받은 후 심장으로 이동한다.",
+      "⑤ 지용성 영양소와 수용성 영양소는 모두 소장에서 흡수된 직후 간문맥을 통해 간으로 들어간다."
+    ],
+    "answer": 3,
+    "exp": "④가 정답. 수용성 영양소(포도당·아미노산): 모세혈관→간문맥→간(저장·조절)→대정맥→심장. 지용성 영양소(지방산·모노글리세리드): 암죽관→림프관→빗장밑정맥→심장(간 미통과)."
+  },
+  {
+    "id": "q007",
+    "type": "mc",
+    "diff": "상",
+    "text": "다음 표는 영양소 A, B, C의 일반적인 특징을 비교한 것이다.\n[A: 4kcal/g, 남으면 지방으로 저장] [B: 4kcal/g, 효소·항체 성분] [C: 9kcal/g, 에너지 효율 높음]\n이에 대한 설명으로 옳은 것은?",
+    "opts": [
+      "① A는 뷰렛 반응으로 보라색을 띤다.",
+      "② B는 우리 몸에서 주로 첫 번째 에너지원으로 소모된다.",
+      "③ C는 물에 잘 녹아 모세 혈관으로 직접 흡수된다.",
+      "④ 성장기 청소년에게는 세포와 근육을 형성하는 B의 섭취가 특히 중요하다.",
+      "⑤ A, B, C 모두 소화 효소의 도움 없이 세포막을 그대로 통과할 수 있다."
+    ],
+    "answer": 3,
+    "exp": "A=탄수화물, B=단백질, C=지방. ④가 정답. ①뷰렛 반응=단백질(B). ②주 에너지원=A(탄수화물). ③지방(C)은 지용성→암죽관 흡수. ⑤3대 영양소는 소화 필수."
+  },
+  {
+    "id": "q008",
+    "type": "mc",
+    "diff": "상",
+    "text": "환자에게 주사하는 '링거액(수액)'에는 포도당 수용액과 무기질이 포함되어 있다. 만약 링거액을 대상으로 영양소 검출 실험을 진행할 때 기대되는 반응 결과로 옳은 것은?",
+    "opts": [
+      "① 아이오딘 반응 - 청람색",
+      "② 베네딕트 반응(가열) - 황적색",
+      "③ 뷰렛 반응 - 보라색",
+      "④ 수단 Ⅲ 반응 - 선홍색",
+      "⑤ 베네딕트 반응 - 가열 없이 즉시 황적색"
+    ],
+    "answer": 1,
+    "exp": "링거액에 포도당이 들어 있으므로 베네딕트 용액 + 가열 → 황적색(②). 녹말·단백질·지방은 없음."
+  },
+  {
+    "id": "q009",
+    "type": "mc",
+    "diff": "상",
+    "text": "다음 중 소화관에서 일어나는 '기계적 소화'와 '화학적 소화'를 올바르게 구분하여 설명한 것은?",
+    "opts": [
+      "① 씹기 운동은 영양소의 분자 크기를 줄이는 화학적 소화이다.",
+      "② 꿈틀 운동(꿈틀거리며 밀어내는 운동)은 영양소를 소화 효소와 섞어주는 기계적 소화이다.",
+      "③ 라이페이스가 지방을 분해하는 것은 대표적인 기계적 소화에 해당한다.",
+      "④ 쓸개즙이 지방 덩어리를 작은 알갱이로 부수는 것은 화학적 소화이다.",
+      "⑤ 화학적 소화가 일어나지 않아도 기계적 소화만으로 영양소가 세포막을 통과할 수 있다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 씹기·꿈틀운동·쓸개즙 유화=기계적 소화. 효소에 의한 분자 구조 변화=화학적 소화. 기계적 소화만으로는 세포막 통과 불가."
+  },
+  {
+    "id": "q010",
+    "type": "mc",
+    "diff": "상",
+    "text": "이자(Pancreas)에서 분비되는 '이자액'에 대한 설명으로 옳지 않은 것은?",
+    "opts": [
+      "① 3대 영양소(탄수화물, 단백질, 지방)를 분해하는 소화 효소가 모두 포함되어 있다.",
+      "② 이자액 속 아밀레이스는 녹말을 엿당으로 분해한다.",
+      "③ 이자액 속 트립신은 단백질을 분해하는 데 관여한다.",
+      "④ 이자액 속 라이페이스는 지방을 지방산과 모노글리세리드로 분해한다.",
+      "⑤ 이자액은 위에서 직접 분비되어 위 안의 산성 음식물을 중화시킨다."
+    ],
+    "answer": 4,
+    "exp": "⑤가 오답. 이자액은 소장(십이지장)으로 분비된다. 위가 아님. 이자액 속 탄산수소나트륨이 소장에서 산성 내용물을 중화."
+  },
+  {
+    "id": "q011",
+    "type": "mc",
+    "diff": "상",
+    "text": "소장의 구조적 특징인 '주름'과 '융털'이 영양소 흡수에 주는 생물학적 이점으로 가장 적절한 것은?",
+    "opts": [
+      "① 소화관의 길이를 단축시켜 음식물의 이동 속도를 높인다.",
+      "② 소화 효소의 분비량을 대폭 줄여 에너지를 절약한다.",
+      "③ 소장 안쪽 벽의 표면적을 매우 넓혀 영양소를 효율적으로 흡수하게 한다.",
+      "④ 소화되지 않은 음식물 찌꺼기를 대장으로 빠르게 배출시킨다.",
+      "⑤ 지용성 영양소만을 선택적으로 배출하도록 돕는다."
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 주름과 융털은 소장 내부 표면적을 테니스장 크기 수준으로 넓혀주어 영양소 흡수 효율을 극대화한다."
+  },
+  {
+    "id": "q012",
+    "type": "mc",
+    "diff": "상",
+    "text": "영양소 중 부영양소(무기염류, 바이타민, 물)에 대한 설명으로 옳지 않은 것은?",
+    "opts": [
+      "① 무기염류와 바이타민은 몸의 기능을 조절하는 역할을 한다.",
+      "② 바이타민은 몸을 구성하는 성분이 아니며, 적은 양으로 생리 기능을 조절한다.",
+      "③ 무기염류는 뼈, 이, 혈액 등을 구성하는 성분이 된다.",
+      "④ 물은 우리 몸에서 가장 높은 비율을 차지하며 물질 운반과 체온 조절에 관여한다.",
+      "⑤ 부영양소는 소화 효소에 의해 아미노산과 포도당으로 분해된 후 흡수된다."
+    ],
+    "answer": 4,
+    "exp": "⑤가 오답. 부영양소(무기염류·바이타민·물)는 분자 크기가 이미 작아 소화 효소 없이 그대로 세포막을 통과하여 흡수된다."
+  },
+  {
+    "id": "q013",
+    "type": "mc",
+    "diff": "상",
+    "text": "사람의 소화계에 대한 설명 중 오개념을 바로잡은 내용으로 옳은 것은?",
+    "opts": [
+      "① '쓸개즙은 쓸개에서 만들어져 지방을 분해한다.' → 쓸개즙은 간에서 만들어진다.",
+      "② '대장에서는 소화 효소가 활발히 분비되어 남은 단백질을 최종 흡수한다.' → 대장에서는 소화 효소가 나오지 않는다.",
+      "③ '입에서는 단백질과 지방의 소화가 동시에 진행된다.' → 입에서는 녹말만 소화된다.",
+      "④ '소화란 음식물을 체온으로 따뜻하게 녹이는 과정이다.' → 소화는 크기가 큰 영양소를 작은 영양소로 화학적/기계적으로 분해하는 과정이다.",
+      "⑤ 위에서 언급한 ①, ②, ③, ④ 모두 올바르게 바로잡은 설명이다."
+    ],
+    "answer": 4,
+    "exp": "⑤가 정답. ①~④에 제시된 오개념 교정 내용이 모두 과학적으로 완벽하게 옳다."
+  },
+  {
+    "id": "q014",
+    "type": "mc",
+    "diff": "상",
+    "text": "침 속의 소화 효소인 아밀레이스가 가장 활발하게 작용하는 온도 조건과, 100℃로 가열했을 때 활성을 잃는 원인을 올바르게 짝지은 것은?",
+    "opts": [
+      "① 0℃ / 세포막이 파괴되기 때문",
+      "② 20℃ / 주위의 수분이 증발하기 때문",
+      "③ 37℃ / 단백질로 이루어진 효소의 구조가 열에 의해 변성되기 때문",
+      "④ 60℃ / 아밀레이스가 녹말로 변하기 때문",
+      "⑤ 100℃ / 염산이 분비되어 중화되기 때문"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 효소=단백질. 37℃(체온)에서 최적 활성. 60~100℃ 고온에서는 단백질 3차 구조 변성→기능 완전 상실(비가역적)."
+  },
+  {
+    "id": "q015",
+    "type": "mc",
+    "diff": "상",
+    "text": "융털로 흡수된 영양소의 이동 경로를 나타낸 것이다.\n• 경로 1: 융털의 (A) → 간문맥 → 간 → 대정맥 → 심장\n• 경로 2: 융털의 (B) → 림프관 → 가슴관 → 빗장밑정맥 → 심장\n(A)와 (B)에 들어갈 구조 및 해당 경로로 이동하는 영양소를 바르게 연결한 것은?",
+    "opts": [
+      "① A: 모세 혈관(포도당), B: 암죽관(지방산)",
+      "② A: 암죽관(아미노산), B: 모세 혈관(모노글리세리드)",
+      "③ A: 모세 혈관(지방산), B: 암죽관(포도당)",
+      "④ A: 암죽관(지방), B: 모세 혈관(단백질)",
+      "⑤ A: 모세 혈관(바이타민 A), B: 암죽관(바이타민 C)"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. A(모세혈관)=수용성 영양소(포도당·아미노산·무기염류·바이타민B·C). B(암죽관)=지용성 영양소(지방산·모노글리세리드·바이타민A·D·E·K)."
+  },
+  {
+    "id": "q016",
+    "type": "mc",
+    "diff": "상",
+    "text": "영양소 분해 과정에서 소화 효소가 가지는 특징으로 옳은 것은?",
+    "opts": [
+      "① 한 종류의 소화 효소는 모든 종류의 영양소를 다 분해할 수 있다.",
+      "② 소화 효소는 반응 과정에서 자신이 직접 소모되어 사라진다.",
+      "③ 소화 효소는 체온 범위(약 37℃)에서 소화 반응 속도를 촉진한다.",
+      "④ 소화 효소는 강한 산성이나 강한 염기성 환경에서 항상 완벽한 구조를 유지한다.",
+      "⑤ 소화 효소는 무기염류와 바이타민을 세포막 통과 크기로 분해한다."
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 효소 특징: 기질 특이성(한 기질만 분해), 반응 후 재사용(소모 안 됨), 37℃ 최적 활성, 강산·강염기에서 변성."
+  },
+  {
+    "id": "q017",
+    "type": "mc",
+    "diff": "상",
+    "text": "음식물이 소화관을 지나가는 순서: 입 → 식도 → (가) → (나) → (다) → 항문\n이 구조에 대한 설명으로 옳은 것은?",
+    "opts": [
+      "① (가)에서는 위액이 분비되어 녹말이 포도당으로 완전히 분해된다.",
+      "② (나)에서는 쓸개즙과 이자액이 유입되어 영양소의 최종 소화와 흡수가 이루어진다.",
+      "③ (다)에서는 소화 효소가 분비되어 물과 단백질을 최종 소화한다.",
+      "④ 간과 이자는 음식물이 직접 통과하는 소화관에 포함된다.",
+      "⑤ (가)에서 분비되는 염산은 (나)로 넘어가 소장의 상피세포를 보호한다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. (가)=위, (나)=소장, (다)=대장. 소장으로 쓸개즙·이자액 유입 → 3대 영양소 최종 소화·흡수 완료."
+  },
+  {
+    "id": "q018",
+    "type": "mc",
+    "diff": "상",
+    "text": "위절제 수술을 받아 위(Stomach)의 대부분을 제거한 환자에게 나타날 수 있는 소화상의 변화로 가장 적절한 추론은?",
+    "opts": [
+      "① 녹말의 소화가 완전히 불가능해진다.",
+      "② 위에서 시작되는 단백질의 1차 분해(펩신 작용)가 저하되므로 음식물을 소량씩 자주 섭취해야 한다.",
+      "③ 쓸개즙 분비가 중단되어 지방 소화가 완전히 멈춘다.",
+      "④ 소장에서 물의 흡수가 불가능해진다.",
+      "⑤ 입에서의 씹기 운동이 일어나지 않는다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 위 절제 시 펩신에 의한 단백질 1차 분해 기능·음식물 저장 기능 저하→소량씩 자주 섭취 필요. 녹말 소화(입·소장)와 쓸개즙(간)은 유지."
+  },
+  {
+    "id": "q019",
+    "type": "mc",
+    "diff": "상",
+    "text": "다음 중 소화액과 그 속에 포함된 소화 효소, 그리고 대상 영양소의 연결이 모두 올바른 것은?",
+    "opts": [
+      "① 침 — 펩신 — 녹말",
+      "② 위액 — 아밀레이스 — 단백질",
+      "③ 이자액 — 아밀레이스, 트립신, 라이페이스 — 녹말, 단백질, 지방",
+      "④ 쓸개즙 — 라이페이스 — 지방",
+      "⑤ 소장 상피세포 효소 — 펩신 — 지방"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 이자액=아밀레이스(녹말)+트립신(단백질)+라이페이스(지방). 쓸개즙은 소화 효소 없음. 침에는 아밀레이스."
+  },
+  {
+    "id": "q020",
+    "type": "mc",
+    "diff": "상",
+    "text": "영양소 검출 시약 중 5% 수산화 나트륨 수용액과 1% 황산 구리(Ⅱ) 수용액을 복합 사용하는 반응(뷰렛 반응)의 반응 원리와 검출 대상은?",
+    "opts": [
+      "① 단백질의 펩타이드 결합 검출 → 보라색",
+      "② 녹말의 구조 변화 검출 → 청람색",
+      "③ 포도당의 환원력 검출 → 황적색",
+      "④ 지방의 지질 용해성 검출 → 선홍색",
+      "⑤ 무기염류의 이온 반응 검출 → 흰색 침전"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 뷰렛 반응: 단백질의 펩타이드 결합(-CO-NH-)에 Cu²⁺ 이온이 복합체 형성 → 보라색."
+  },
+  {
+    "id": "q021",
+    "type": "mc",
+    "diff": "상",
+    "text": "식물체와 동물체의 구성 단계를 비교한 설명으로 옳지 않은 것은?",
+    "opts": [
+      "① 식물체와 동물체 모두 세포가 생명 활동의 기본 단위이다.",
+      "② 모양과 기능이 비슷한 세포가 모여 '조직'을 이루는 것은 공통점이다.",
+      "③ 식물체에는 '조직계' 단계가 있고, 동물체에는 '기관계' 단계가 있다.",
+      "④ 동물의 '위'와 식물의 '잎'은 모두 '기관' 단계에 해당한다.",
+      "⑤ 동물의 '소화계'와 식물의 '뿌리'는 동일한 '기관계' 단계이다."
+    ],
+    "answer": 4,
+    "exp": "⑤가 오답. 식물의 '뿌리'는 '기관' 단계이다. 식물에는 기관계가 없고 '조직계'가 있다."
+  },
+  {
+    "id": "q022",
+    "type": "mc",
+    "diff": "상",
+    "text": "녹말과 단백질, 지방이 소화 과정을 거쳐야만 하는 근본적인 이유는?",
+    "opts": [
+      "① 이들 영양소는 분자 크기가 커서 세포막을 통과할 수 없기 때문이다.",
+      "② 이들 영양소는 체온을 낮추는 부작용이 있기 때문이다.",
+      "③ 소화 과정을 거치지 않으면 무기염류로 변해버리기 때문이다.",
+      "④ 이들 영양소는 물에 너무 잘 녹아 방광으로 바로 배출되기 때문이다.",
+      "⑤ 소화 효소와 결합해야만 독성이 제거되기 때문이다."
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 3대 영양소는 고분자 화합물로 분자 크기가 커서 세포막의 미세한 통로를 통과 불가→소화를 통해 단분자로 분해되어야 흡수 가능."
+  },
+  {
+    "id": "q023",
+    "type": "mc",
+    "diff": "상",
+    "text": "다음 그림은 단백질이 소화되는 과정을 나타낸 것이다.\n단백질 → (A) 작용 → 중간 단계 단백질 → (B) 및 소장 효소 작용 → 아미노산\n(A)와 (B)에 들어갈 소화 효소를 바르게 짝지은 것은?",
+    "opts": [
+      "① A: 아밀레이스, B: 펩신",
+      "② A: 펩신, B: 트립신",
+      "③ A: 트립신, B: 라이페이스",
+      "④ A: 라이페이스, B: 아밀레이스",
+      "⑤ A: 펩신, B: 아밀레이스"
+    ],
+    "answer": 1,
+    "exp": "②가 정답. A(위)=펩신, B(소장)=트립신(이자액)+소장 상피세포 효소→최종 아미노산."
+  },
+  {
+    "id": "q024",
+    "type": "mc",
+    "diff": "상",
+    "text": "녹말이 입과 소장을 거치면서 최종적으로 포도당이 되는 과정에 참여하는 소화 효소를 순서대로 나열한 것은?",
+    "opts": [
+      "① 펩신 → 트립신",
+      "② 침 아밀레이스 → 이자액 아밀레이스 → 소장 상피세포 소화 효소",
+      "③ 쓸개즙 → 라이페이스",
+      "④ 라이페이스 → 펩신",
+      "⑤ 트립신 → 침 아밀레이스"
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 녹말: 입(침 아밀레이스)→엿당, 소장(이자 아밀레이스+소장 효소)→포도당."
+  },
+  {
+    "id": "q025",
+    "type": "mc",
+    "diff": "상",
+    "text": "소장 융털의 모세 혈관으로 흡수되는 영양소와 암죽관으로 흡수되는 영양소를 바르게 분류한 것은?\n• 모세 혈관 흡수 영양소: (X)\n• 암죽관 흡수 영양소: (Y)",
+    "opts": [
+      "① X: 포도당, 아미노산 / Y: 지방산, 모노글리세리드",
+      "② X: 지방산, 모노글리세리드 / Y: 포도당, 아미노산",
+      "③ X: 포도당, 지방산 / Y: 아미노산, 모노글리세리드",
+      "④ X: 단백질, 녹말 / Y: 지방, 무기염류",
+      "⑤ X: 바이타민 A, D / Y: 바이타민 B, C"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. X(모세혈관)=수용성 영양소(포도당·아미노산·무기염류·바이타민B·C). Y(암죽관)=지용성 영양소(지방산·모노글리세리드·바이타민A·D·E·K)."
+  },
+  {
+    "id": "q026",
+    "type": "mc",
+    "diff": "상",
+    "text": "대장(Large Intestine)의 주요 기능으로 가장 옳게 설명한 것은?",
+    "opts": [
+      "① 소화 효소를 대량 분비하여 남은 지방을 최종 소화한다.",
+      "② 주름과 융털이 발달하여 포도당을 집중적으로 흡수한다.",
+      "③ 소화액은 분비되지 않으며, 주로 물을 흡수하고 남은 찌꺼기를 대변으로 형성한다.",
+      "④ 쓸개즙을 저장했다가 위로 역류시킨다.",
+      "⑤ 단백질을 아미노산으로 분해하여 림프관으로 보낸다."
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 대장=소화 효소 없음, 화학적 소화 없음, 주로 수분 흡수 후 대변 형성."
+  },
+  {
+    "id": "q027",
+    "type": "mc",
+    "diff": "상",
+    "text": "온도에 따른 침 속 아밀레이스의 반응 속도 변화를 관찰할 때, 0℃에서 반응이 일어나지 않다가 다시 37℃로 온도를 올렸을 때 일어나는 현상으로 옳은 것은?",
+    "opts": [
+      "① 효소가 완전 파괴되었으므로 온도를 올려도 반응이 일어나지 않는다.",
+      "② 효소의 입자 운동이 다시 활발해져 녹말 분해 반응이 정상 진행된다.",
+      "③ 아밀레이스가 펩신으로 변환된다.",
+      "④ 녹말이 지방으로 합성된다.",
+      "⑤ 아이오딘 반응 결과가 보라색으로 변한다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 0℃는 저온으로 효소 활성 억제(운동 둔화)이지 변성이 아님. 37℃로 온도 회복 시 활성 재개. 고온(변성)과 저온(억제)의 차이가 핵심."
+  },
+  {
+    "id": "q028",
+    "type": "mc",
+    "diff": "상",
+    "text": "영양소 중 '지방'을 검출할 때 사용하는 시약과 반응 결과 색깔은?",
+    "opts": [
+      "① 아이오딘-아이오딘화 칼륨 용액 — 청람색",
+      "② 베네딕트 용액(가열) — 황적색",
+      "③ 5% 수산화 나트륨 + 1% 황산 구리(Ⅱ) 수용액 — 보라색",
+      "④ 수단 Ⅲ 용액 — 선홍색",
+      "⑤ 뷰렛 용액 — 황적색"
+    ],
+    "answer": 3,
+    "exp": "④가 정답. 수단 Ⅲ 용액은 지방(지질)과 반응하여 선홍색을 나타낸다."
+  },
+  {
+    "id": "q029",
+    "type": "mc",
+    "diff": "상",
+    "text": "베네딕트 용액을 이용한 당분 검출 실험 시 학생들이 자주 실수하는 '가열 조건'에 대한 설명으로 옳은 것은?",
+    "opts": [
+      "① 베네딕트 반응은 찬물(0℃)에서 가장 빠르게 색이 변한다.",
+      "② 베네딕트 용액을 첨가한 후 80~90℃의 물에 담가 가열해야 황적색 반응이 나타난다.",
+      "③ 알코올 램프 불꽃에 시험관을 직접 대고 10분간 끓여 파괴해야 한다.",
+      "④ 베네딕트 반응은 빛을 차단한 암실에서만 일어난다.",
+      "⑤ 베네딕트 반응은 수산화 나트륨을 넣어야만 가열 없이 반응한다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 베네딕트 반응=80~90℃ 물중탕 가열 필수. 직접 불꽃 가열은 시험관 파손 위험."
+  },
+  {
+    "id": "q030",
+    "type": "mc",
+    "diff": "상",
+    "text": "사람의 소화계 중 '간(Liver)'의 기능에 대한 설명으로 옳지 않은 것은?",
+    "opts": [
+      "① 지방의 소화를 돕는 쓸개즙을 생성한다.",
+      "② 융털의 모세 혈관을 통해 들어온 포도당 중 일부를 글리코젠으로 바꿔 저장한다.",
+      "③ 단백질 분해 결과 생긴 독성이 강한 암모니아를 독성이 적은 요소로 전환한다.",
+      "④ 3대 영양소를 직접 화학적으로 분해하는 소화 효소를 대량으로 직접 분비한다.",
+      "⑤ 우리 몸의 중요한 대사 및 해독 작용을 담당한다."
+    ],
+    "answer": 3,
+    "exp": "④가 오답. 간은 소화 효소를 소화관으로 직접 분비하지 않는다. 쓸개즙 생성·포도당 저장(글리코젠)·암모니아→요소 전환·해독 담당."
+  },
+  {
+    "id": "q031",
+    "type": "mc",
+    "diff": "중",
+    "text": "동물의 몸 구성 단계를 작은 단계부터 큰 단계 순서로 바르게 나열한 것은?",
+    "opts": [
+      "① 세포 → 조직 → 기관 → 기관계 → 개체",
+      "② 세포 → 기관 → 조직 → 기관계 → 개체",
+      "③ 조직 → 세포 → 기관 → 개체 → 기관계",
+      "④ 세포 → 조직 → 기관계 → 기관 → 개체",
+      "⑤ 개체 → 기관계 → 기관 → 조직 → 세포"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 동물의 몸 구성 단계: 세포 → 조직 → 기관 → 기관계 → 개체."
+  },
+  {
+    "id": "q032",
+    "type": "mc",
+    "diff": "중",
+    "text": "우리 몸의 3대 영양소(주 영양소)에 해당하는 것만을 고른 것은?",
+    "opts": [
+      "① 무기염류, 바이타민, 물",
+      "② 탄수화물, 단백질, 지방",
+      "③ 탄수화물, 무기염류, 바이타민",
+      "④ 단백질, 지방, 물",
+      "⑤ 지방, 바이타민, 물"
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 3대 영양소(주 영양소)=탄수화물·단백질·지방. 무기염류·바이타민·물은 부영양소."
+  },
+  {
+    "id": "q033",
+    "type": "mc",
+    "diff": "중",
+    "text": "탄수화물에 대한 설명으로 옳지 않은 것은?",
+    "opts": [
+      "① 주로 우리 몸의 주된 에너지원으로 이용된다.",
+      "② 1g당 약 4 kcal의 에너지를 낸다.",
+      "③ 밥, 빵, 국수, 고구마 등에 많이 들어 있다.",
+      "④ 사용하고 남은 탄수화물은 주로 지방으로 바뀌어 저장된다.",
+      "⑤ 우리 몸을 구성하는 비율이 가장 높은 영양소이다."
+    ],
+    "answer": 4,
+    "exp": "⑤가 오답. 몸을 구성하는 비율이 가장 높은 것은 '물'(약 60~70%). 탄수화물은 주 에너지원으로 소모."
+  },
+  {
+    "id": "q034",
+    "type": "mc",
+    "diff": "중",
+    "text": "단백질에 대한 설명으로 옳은 것은?",
+    "opts": [
+      "① 주로 에너지원으로만 쓰이고 몸은 구성하지 않는다.",
+      "② 살코기, 생선, 달걀, 두부 등에 많이 들어 있다.",
+      "③ 1g당 9 kcal의 에너지를 낸다.",
+      "④ 아이오딘 용액과 반응하여 청람색을 띤다.",
+      "⑤ 남으면 모두 바이타민으로 변한다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 단백질=살코기·생선·달걀·콩·두부에 풍부. 4kcal/g. 몸 구성(근육·효소·항체) + 에너지원."
+  },
+  {
+    "id": "q035",
+    "type": "mc",
+    "diff": "중",
+    "text": "무기염류와 바이타민의 공통점으로 옳은 것은?",
+    "opts": [
+      "① 1g당 4 kcal의 에너지를 낸다.",
+      "② 몸의 생리 기능을 조절한다.",
+      "③ 우리 몸을 구성하는 주된 에너지원이다.",
+      "④ 소장에서 라이페이스에 의해 분해된다.",
+      "⑤ 부족해도 결핍증이 전혀 나타나지 않는다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 무기염류와 바이타민은 에너지를 내지 않는 부영양소로 몸의 생리 기능 조절 역할 공통."
+  },
+  {
+    "id": "q036",
+    "type": "mc",
+    "diff": "중",
+    "text": "녹말을 검출할 때 사용하는 시약과 반응 결과 색깔을 바르게 짝지은 것은?",
+    "opts": [
+      "① 베네딕트 용액 — 황적색",
+      "② 수단 Ⅲ 용액 — 선홍색",
+      "③ 아이오딘-아이오딘화 칼륨 용액 — 청람색",
+      "④ 뷰렛 용액 — 보라색",
+      "⑤ 황산 구리 수용액 — 황적색"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 아이오딘-아이오딘화 칼륨 용액 + 녹말 → 청람색."
+  },
+  {
+    "id": "q037",
+    "type": "mc",
+    "diff": "중",
+    "text": "포도당이나 엿당과 같은 당분을 검출하는 반응에 대한 설명으로 옳은 것은?",
+    "opts": [
+      "① 수단 Ⅲ 용액을 넣고 보라색 변화를 관찰한다.",
+      "② 베네딕트 용액을 넣고 가열하면 황적색으로 변한다.",
+      "③ 아이오딘 용액을 넣고 청람색 변화를 관찰한다.",
+      "④ 뷰렛 용액을 넣고 가열하면 선홍색으로 변한다.",
+      "⑤ 가열하면 검은색 침전이 형성된다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 당분 검출=베네딕트 용액 + 가열 → 황적색."
+  },
+  {
+    "id": "q038",
+    "type": "mc",
+    "diff": "중",
+    "text": "소화의 정의로 가장 올바른 것은?",
+    "opts": [
+      "① 영양소를 체온으로 따뜻하게 데우는 과정",
+      "② 크기가 큰 영양소를 세포막을 통과할 수 있을 만큼 작게 분해하는 과정",
+      "③ 영양소를 에너지를 이용하여 합성하는 과정",
+      "④ 소화관을 통해 영양소를 몸 밖으로 배출하는 과정",
+      "⑤ 영양소를 혈액 속에 저장하는 과정"
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 소화=섭취한 고분자 영양소를 세포막을 통과 가능한 크기의 단분자로 분해하는 과정."
+  },
+  {
+    "id": "q039",
+    "type": "mc",
+    "diff": "중",
+    "text": "입안에서 일어나는 소화 작용으로 옳은 것은?",
+    "opts": [
+      "① 이로 음식물을 부수는 기계적 소화가 일어난다.",
+      "② 침 속 아밀레이스에 의해 단백질이 분해된다.",
+      "③ 위액이 분비되어 강한 산성을 띠게 된다.",
+      "④ 지방이 지방산으로 완전히 분해된다.",
+      "⑤ 쓸개즙이 분비되어 녹말을 분해한다."
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 입에서는 이로 씹는 기계적 소화+침 아밀레이스에 의한 녹말의 화학적 소화(→엿당)가 동시에 시작."
+  },
+  {
+    "id": "q040",
+    "type": "mc",
+    "diff": "중",
+    "text": "위(Stomach)에서 분비되는 위액에 포함된 소화 효소와 보조 물질은?",
+    "opts": [
+      "① 아밀레이스와 쓸개즙",
+      "② 펩신과 염산",
+      "③ 트립신과 라이페이스",
+      "④ 라이페이스와 염산",
+      "⑤ 펩신과 아밀레이스"
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 위액=펩신(단백질 분해 효소)+염산(펩신 보조·살균 작용)."
+  },
+  {
+    "id": "q041",
+    "type": "mc",
+    "diff": "중",
+    "text": "이자액에 포함되어 있는 소화 효소 3가지를 바르게 짝지은 것은?",
+    "opts": [
+      "① 아밀레이스, 펩신, 라이페이스",
+      "② 펩신, 트립신, 라이페이스",
+      "③ 아밀레이스, 트립신, 라이페이스",
+      "④ 아밀레이스, 펩신, 트립신",
+      "⑤ 라이페이스, 쓸개즙, 펩신"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 이자액 3종 효소: 아밀레이스(녹말)+트립신(단백질)+라이페이스(지방)."
+  },
+  {
+    "id": "q042",
+    "type": "mc",
+    "diff": "중",
+    "text": "쓸개즙에 대한 설명으로 옳지 않은 것은?",
+    "opts": [
+      "① 간에서 생성된다.",
+      "② 쓸개에 임시 저장되었다가 소장으로 분비된다.",
+      "③ 소화 효소가 들어 있지 않다.",
+      "④ 지방 덩어리를 작은 알갱이로 만들어 소화를 돕는다.",
+      "⑤ 단백질을 아미노산으로 직접 분해한다."
+    ],
+    "answer": 4,
+    "exp": "⑤가 오답. 쓸개즙에는 소화 효소가 전혀 없어 단백질 분해 불가. 기계적 보조(지방 유화)만 담당."
+  },
+  {
+    "id": "q043",
+    "type": "mc",
+    "diff": "중",
+    "text": "소장에서 영양소가 최종 분해된 산물의 연결이 바른 것은?",
+    "opts": [
+      "① 녹말 → 포도당",
+      "② 단백질 → 지방산",
+      "③ 지방 → 아미노산",
+      "④ 녹말 → 아미노산",
+      "⑤ 단백질 → 포도당"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 녹말→포도당, 단백질→아미노산, 지방→지방산+모노글리세리드."
+  },
+  {
+    "id": "q044",
+    "type": "mc",
+    "diff": "중",
+    "text": "소장 안쪽 벽의 특징에 대한 설명으로 옳은 것은?",
+    "opts": [
+      "① 주름과 융털이 없어 매끈하다.",
+      "② 표면적이 매우 넓어 영양소 흡수에 유리하다.",
+      "③ 물의 흡수만 담당하고 영양소는 흡수하지 않는다.",
+      "④ 암죽관만 존재하고 모세 혈관은 없다.",
+      "⑤ 소화 효소를 전혀 분비하지 않는다."
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 소장 안쪽 벽=주름+무수한 융털로 표면적이 극대화되어 영양소 흡수에 최적화."
+  },
+  {
+    "id": "q045",
+    "type": "mc",
+    "diff": "중",
+    "text": "소장 융털의 모세 혈관으로 흡수되는 영양소끼리 짝지은 것은?",
+    "opts": [
+      "① 지방산, 모노글리세리드",
+      "② 포도당, 아미노산",
+      "③ 지방, 지방산",
+      "④ 중성 지방, 바이타민 A",
+      "⑤ 모노글리세리드, 바이타민 D"
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 모세혈관=수용성(포도당·아미노산·무기염류·바이타민B·C). 지방산·모노글리세리드는 암죽관."
+  },
+  {
+    "id": "q046",
+    "type": "mc",
+    "diff": "중",
+    "text": "소장 융털의 암죽관으로 흡수되는 영양소끼리 짝지은 것은?",
+    "opts": [
+      "① 포도당, 무기염류",
+      "② 아미노산, 포도당",
+      "③ 지방산, 모노글리세리드",
+      "④ 바이타민 B, C",
+      "⑤ 아미노산, 무기염류"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 암죽관=지용성(지방산·모노글리세리드·바이타민A·D·E·K)."
+  },
+  {
+    "id": "q047",
+    "type": "mc",
+    "diff": "중",
+    "text": "대장(Large Intestine)에서 주로 일어나는 작용은?",
+    "opts": [
+      "① 녹말의 화학적 소화",
+      "② 단백질의 화학적 소화",
+      "③ 물의 흡수",
+      "④ 쓸개즙의 생성",
+      "⑤ 이자액의 분비"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 대장=소화 효소 없음, 주로 수분 흡수 후 대변 형성."
+  },
+  {
+    "id": "q048",
+    "type": "mc",
+    "diff": "중",
+    "text": "영양소가 세포막을 통과하여 몸속으로 흡수되기 위해 반드시 거쳐야 하는 과정은?",
+    "opts": [
+      "① 배설",
+      "② 소화",
+      "③ 순환",
+      "④ 호흡",
+      "⑤ 감각"
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 소화를 통해 고분자 영양소를 세포막 통과 가능한 크기로 분해해야 흡수 가능."
+  },
+  {
+    "id": "q049",
+    "type": "mc",
+    "diff": "중",
+    "text": "다음 소화 기관 중 음식물이 직접 통과하지 않는 기관은?",
+    "opts": [
+      "① 식도",
+      "② 위",
+      "③ 이자",
+      "④ 소장",
+      "⑤ 대장"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 이자(췌장)·간·쓸개는 소화액을 소장으로 보낼 뿐, 음식물이 직접 통과하지 않는다."
+  },
+  {
+    "id": "q050",
+    "type": "mc",
+    "diff": "중",
+    "text": "3대 영양소 중 소장에서 최초로 화학적 소화가 시작되는 영양소는?",
+    "opts": [
+      "① 녹말",
+      "② 단백질",
+      "③ 지방",
+      "④ 바이타민",
+      "⑤ 무기염류"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 녹말=입에서 시작, 단백질=위에서 시작. 지방은 입·위를 거쳐 소장에서 이자 라이페이스에 의해 최초 화학적 소화 시작."
+  },
+  {
+    "id": "q051",
+    "type": "mc",
+    "diff": "하",
+    "text": "생물체의 몸을 구성하는 가장 기본적인 단위는 무엇인가?",
+    "opts": [
+      "① 세포",
+      "② 조직",
+      "③ 기관",
+      "④ 기관계",
+      "⑤ 개체"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 세포=모든 생물체의 구조적·기능적 기본 단위."
+  },
+  {
+    "id": "q052",
+    "type": "mc",
+    "diff": "하",
+    "text": "음식물에 들어 있는 영양소를 세포가 흡수할 수 있도록 작게 분해하는 과정을 무엇이라고 하는가?",
+    "opts": [
+      "① 소화",
+      "② 호흡",
+      "③ 순환",
+      "④ 배설",
+      "⑤ 자극"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 소화=큰 영양소를 세포막 통과 가능한 크기로 분해하는 과정."
+  },
+  {
+    "id": "q053",
+    "type": "mc",
+    "diff": "하",
+    "text": "다음 중 우리 몸에서 에너지원으로 사용되는 3대 영양소가 아닌 것은?",
+    "opts": [
+      "① 탄수화물",
+      "② 단백질",
+      "③ 지방",
+      "④ 바이타민",
+      "⑤ 포도당"
+    ],
+    "answer": 3,
+    "exp": "④가 정답. 바이타민은 에너지를 내지 않는 부영양소."
+  },
+  {
+    "id": "q054",
+    "type": "mc",
+    "diff": "하",
+    "text": "영양소 중 1g당 9 kcal의 가장 높은 에너지를 내는 영양소는?",
+    "opts": [
+      "① 탄수화물",
+      "② 단백질",
+      "③ 지방",
+      "④ 물",
+      "⑤ 무기염류"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 지방=9kcal/g (탄수화물·단백질=4kcal/g)."
+  },
+  {
+    "id": "q055",
+    "type": "mc",
+    "diff": "하",
+    "text": "밥, 빵, 고구마, 감자 등에 많이 들어 있으며 우리 몸의 주 에너지원으로 쓰이는 영양소는?",
+    "opts": [
+      "① 탄수화물",
+      "② 단백질",
+      "③ 지방",
+      "④ 바이타민",
+      "⑤ 무기염류"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 탄수화물(녹말)=밥·빵·고구마·감자의 주성분, 주 에너지원."
+  },
+  {
+    "id": "q056",
+    "type": "mc",
+    "diff": "하",
+    "text": "녹말이 들어 있는 용액에 아이오딘-아이오딘화 칼륨 용액을 떨어뜨릴 때 나타나는 색깔은?",
+    "opts": [
+      "① 황적색",
+      "② 보라색",
+      "③ 선홍색",
+      "④ 청람색",
+      "⑤ 무색"
+    ],
+    "answer": 3,
+    "exp": "④가 정답. 녹말 + 아이오딘-아이오딘화 칼륨 용액 → 청람색."
+  },
+  {
+    "id": "q057",
+    "type": "mc",
+    "diff": "하",
+    "text": "입안의 침 속에 들어 있으며 녹말을 엿당으로 분해하는 소화 효소의 이름은?",
+    "opts": [
+      "① 펩신",
+      "② 아밀레이스",
+      "③ 트립신",
+      "④ 라이페이스",
+      "⑤ 염산"
+    ],
+    "answer": 1,
+    "exp": "②가 정답. 침 속 소화 효소=아밀레이스(녹말→엿당)."
+  },
+  {
+    "id": "q058",
+    "type": "mc",
+    "diff": "하",
+    "text": "단백질이 완전히 소화되었을 때 형성되는 최종 분해 산물은?",
+    "opts": [
+      "① 포도당",
+      "② 엿당",
+      "③ 아미노산",
+      "④ 지방산",
+      "⑤ 모노글리세리드"
+    ],
+    "answer": 2,
+    "exp": "③이 정답. 단백질 최종 분해 산물=아미노산."
+  },
+  {
+    "id": "q059",
+    "type": "mc",
+    "diff": "하",
+    "text": "소장에서 지방을 지방산과 모노글리세리드로 분해하는 소화 효소는?",
+    "opts": [
+      "① 아밀레이스",
+      "② 펩신",
+      "③ 트립신",
+      "④ 라이페이스",
+      "⑤ 뷰렛"
+    ],
+    "answer": 3,
+    "exp": "④가 정답. 라이페이스=이자액 속 지방 분해 효소(지방→지방산+모노글리세리드)."
+  },
+  {
+    "id": "q060",
+    "type": "mc",
+    "diff": "하",
+    "text": "소장 안쪽 벽의 주름 표면에 무수히 많이 돋아 있는 작은 돌기 구조는?",
+    "opts": [
+      "① 융털",
+      "② 사구체",
+      "③ 세뇨관",
+      "④ 동맥",
+      "⑤ 판막"
+    ],
+    "answer": 0,
+    "exp": "①이 정답. 융털=소장 안쪽 벽 주름의 미세 돌기 구조, 표면적 증가→영양소 흡수 담당."
+  }
+];
+
+const DEMO_QUIZ = {
+  id:'quiz_science_60',
+  title:'동물과 에너지 — 소화 단원 총정리 (60문항)',
+  subject:'과학',grade:'중학교 2학년',
+  desc:'2026학년도 2학기 중간고사 대비 — 난이도 상(30)/중(20)/하(10) 혼합',
+  timeLimit:0,createdAt:'2026-08-03',
+  questions: SCIENCE_QUIZ_60
+};
+
+/* ━━━━ STORAGE ━━━━ */
+const SK={STUDENTS:'eden_students',QUIZZES:'eden_quizzes',SCORES:'eden_scores'};
+async function sGet(k){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):null;}catch{return null;}}
+async function sSet(k,v){try{await window.storage.set(k,JSON.stringify(v));}catch(e){console.error(e);}}
+
+const DEF_STUDENTS=[
+  {name:'권다은',pw:'129200'},{name:'김민정',pw:'837500'},{name:'김민지',pw:'837501'},
+  {name:'김유성',pw:'505600'},{name:'박민균',pw:'499500'},{name:'박준혁',pw:'283700'},
+  {name:'박준혁(H)',pw:'141600'},{name:'박채영',pw:'305500'},{name:'손은지',pw:'790500'},
+  {name:'손지예',pw:'149700'},{name:'신윤혁',pw:'655900'},{name:'심우진',pw:'400700'},
+  {name:'이성현',pw:'780900'},{name:'이수연',pw:'095400'},{name:'이승찬',pw:'005100'},
+  {name:'이윤재',pw:'951100'},{name:'이재훈',pw:'095400'},{name:'이주형',pw:'005101'},
+  {name:'조승훈',pw:'144300'},{name:'조여은류나',pw:'988000'},{name:'황혜암',pw:'281700'}
+];
+async function getStudents(){let s=await sGet(SK.STUDENTS);if(!s){s=DEF_STUDENTS;await sSet(SK.STUDENTS,s);}return s;}
+async function getQuizzes(){let q=await sGet(SK.QUIZZES);if(!q){q=[DEMO_QUIZ];await sSet(SK.QUIZZES,q);}return q;}
+async function getScores(){let s=await sGet(SK.SCORES);if(!s){s=[];await sSet(SK.SCORES,s);}return s;}
+async function addScore(e){const s=await getScores();s.push(e);await sSet(SK.SCORES,s);}
+
+/* ━━━━ AUTH ━━━━ */
+let currentUser=null;
+function toggleAdminBox(){const b=document.getElementById('admin-login-box');b.style.display=b.style.display==='none'?'block':'none';}
+async function loginStudent(){
+  const name=document.getElementById('inp-name').value.trim();
+  const pw=document.getElementById('inp-pw').value.trim();
+  if(!name||!pw){document.getElementById('login-err').textContent='이름과 비밀번호를 입력하세요.';return;}
+  const s=await getStudents();
+  const found=s.find(x=>x.name===name&&String(x.pw)===String(pw));
+  if(!found){document.getElementById('login-err').textContent='이름 또는 비밀번호가 올바르지 않습니다.';return;}
+  currentUser={name,role:'student'};showDashboard();
+}
+function loginAdmin(){
+  const id=document.getElementById('inp-admin-id').value.trim();
+  const pw=document.getElementById('inp-admin-pw').value.trim();
+  if(id==='eden'&&pw==='eden2026'){currentUser={name:'관리자',role:'admin'};showAdmin();}
+  else document.getElementById('admin-err').textContent='관리자 계정 정보가 올바르지 않습니다.';
+}
+function logout(){currentUser=null;currentQuiz=null;currentAnswers={};retrySet=null;show('screen-login');document.getElementById('inp-name').value='';document.getElementById('inp-pw').value='';document.getElementById('login-err').textContent='';}
+
+/* ━━━━ SCREEN ━━━━ */
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='tab-scores')renderScoreTable();
+  if(id==='tab-students')renderStudentTable();
+  if(id==='tab-quizzes')renderAdminQuizList();
+}
+
+/* ━━━━ DASHBOARD ━━━━ */
+async function showDashboard(){
+  show('screen-dashboard');
+  document.getElementById('dash-name').textContent=currentUser.name;
+  const [quizzes,scores]=await Promise.all([getQuizzes(),getScores()]);
+  const my=scores.filter(s=>s.student===currentUser.name);
+  document.getElementById('stat-total').textContent=my.length;
+  if(my.length){
+    document.getElementById('stat-avg').textContent=Math.round(my.reduce((a,b)=>a+b.score,0)/my.length)+'점';
+    document.getElementById('stat-best').textContent=Math.max(...my.map(s=>s.score))+'점';
+  }
+  const grid=document.getElementById('quiz-grid');grid.innerHTML='';
+  quizzes.forEach(qz=>{
+    const mb=my.filter(s=>s.quizId===qz.id);
+    const best=mb.length?Math.max(...mb.map(s=>s.score)):null;
+    const d=document.createElement('div');d.className='quiz-item';
+    const icons=['📖','🔬','📐','🌍','📝','🧬','💡','🎯'];
+    const ic=icons[quizzes.indexOf(qz)%icons.length];
+    d.innerHTML=`
+      <div class="qi-header">
+        <div class="qi-icon">${ic}</div>
+        <div class="qi-info">
+          <div class="qi-subject">${qz.subject}</div>
+          <div class="qi-title">${qz.title}</div>
+        </div>
+      </div>
+      <div class="qi-meta" style="margin-bottom:8px"><span>📚 ${qz.grade}</span><span>📝 ${qz.questions.length}문항</span>${qz.timeLimit?`<span>⏱️ ${qz.timeLimit}분</span>`:''}</div>
+      <div class="qi-score ${best!==null?'done':'undone'}" style="margin-bottom:0">${best!==null?`🏆 최고 ${best}점 &nbsp;·&nbsp; ${mb.length}회 응시`:'아직 응시하지 않았어요'}</div>
+      <div class="qi-mode-btns">
+        <button class="qi-btn qi-btn-all" onclick="startQuizMode('${qz.id}','all')">
+          <span class="qi-btn-icon">📋</span> 전체 풀기
+        </button>
+        <button class="qi-btn qi-btn-single" onclick="startQuizMode('${qz.id}','single')">
+          <span class="qi-btn-icon">🎯</span> 개별 풀기
+        </button>
+      </div>`;
+    grid.appendChild(d);
+  });
+  const tbody=document.getElementById('history-body');
+  if(!my.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--mute);padding:20px">응시 기록이 없습니다.</td></tr>';return;}
+  tbody.innerHTML=[...my].sort((a,b)=>b.time-a.time).map(s=>{
+    const cls=s.score>=80?'sp-high':s.score>=60?'sp-mid':'sp-low';
+    return `<tr><td>${s.quizTitle}</td><td>${new Date(s.time).toLocaleString('ko-KR')}</td><td><span class="score-pill ${cls}">${s.score}점</span></td><td>${s.correct}/${s.total}</td><td>${s.wrong}</td></tr>`;
+  }).join('');
+}
+function backToDash(){if(currentUser?.role==='admin')showAdmin();else showDashboard();}
+
+/* ━━━━ MODE SELECTOR ━━━━ */
+async function startQuizMode(quizId, mode){
+  if(mode==='all') await startQuiz(quizId);
+  else             await startSingle(quizId);
+}
+
+/* ━━━━ 개별풀기 엔진 ━━━━ */
+let sQuiz=null, sIdx=0, sAnswers={}, sResults={}, sCurrentPick=null;
+
+async function startSingle(quizId, qFilter=null){
+  const qs=await getQuizzes();
+  const qz=qs.find(q=>q.id===quizId);
+  if(!qz){alert('시험지를 찾을 수 없습니다.');return;}
+  sQuiz={...qz};
+  if(qFilter) sQuiz.questions=qz.questions.filter(q=>qFilter.includes(q.id));
+  sIdx=0; sAnswers={}; sResults={}; sCurrentPick=null;
+  show('screen-single');
+  document.getElementById('st-title').textContent=sQuiz.title;
+  document.getElementById('st-info').textContent=`${currentUser.name} | ${sQuiz.questions.length}문항 · 개별 풀기`;
+  buildSPalette();
+  renderSingle();
+}
+
+function buildSPalette(){
+  const pal=document.getElementById('s-palette'); pal.innerHTML='';
+  sQuiz.questions.forEach((q,i)=>{
+    const b=document.createElement('button');
+    b.className='sp-btn'; b.id=`sp-${q.id}`; b.textContent=i+1;
+    b.onclick=()=>{ sIdx=i; sCurrentPick=null; renderSingle(); };
+    pal.appendChild(b);
+  });
+}
+
+function renderSingle(){
+  const qs=sQuiz.questions;
+  const q=qs[sIdx];
+  // 진행바
+  const done=Object.keys(sResults).length;
+  document.getElementById('s-progress').style.width=Math.round(done/qs.length*100)+'%';
+  // 위치
+  document.getElementById('snb-pos').textContent=`${sIdx+1} / ${qs.length}`;
+  document.getElementById('btn-s-prev').disabled=(sIdx===0);
+  document.getElementById('btn-s-next').disabled=(sIdx===qs.length-1);
+  document.getElementById('btn-s-next2').disabled=(sIdx===qs.length-1);
+  // 팔레트
+  qs.forEach((qq,i)=>{
+    const b=document.getElementById(`sp-${qq.id}`);
+    if(!b)return;
+    b.className='sp-btn';
+    if(i===sIdx) b.classList.add('s-active');
+    else if(sResults[qq.id]==='correct')  b.classList.add('s-ok');
+    else if(sResults[qq.id]==='partial')  b.classList.add('s-partial');
+    else if(sResults[qq.id]==='wrong')    b.classList.add('s-wrong');
+  });
+  // 해설 숨기기
+  document.getElementById('single-exp-box').classList.remove('show');
+  // 카드
+  const card=document.getElementById('single-q-card');
+  card.className='single-q-card';
+  if(sResults[q.id]==='correct') card.classList.add('s-correct');
+  else if(sResults[q.id]==='partial') card.classList.add('s-partial');
+  else if(sResults[q.id]==='wrong')   card.classList.add('s-wrong');
+
+  const db=`<span class="badge badge-${q.diff==='상'?'hard':q.diff==='중'?'mid':'easy'}">${q.diff}</span>`;
+  const tb=`<span class="badge badge-sub">${q.type==='mc'?'객관식':'주관식'}</span>`;
+  const already=sResults[q.id]!==undefined;
+
+  let inner='';
+  if(q.type==='mc'){
+    inner=`<ul class="single-opts">${q.opts.map((o,oi)=>{
+      let cls='single-opt-btn';
+      if(already){
+        if(oi===q.answer) cls+=' s-cor';
+        else if(sAnswers[q.id]===oi) cls+=' s-err';
+      } else if(sCurrentPick===oi) cls+=' s-sel';
+      return `<li><button class="${cls}" id="sopt-${q.id}-${oi}" onclick="sPick(${oi})" ${already?'disabled':''}>${o}</button></li>`;
+    }).join('')}</ul>`;
+  } else {
+    const v=sAnswers[q.id]||'';
+    let cls='single-subj-input';
+    if(already){
+      if(sResults[q.id]==='correct') cls+=' s-cor';
+      else if(sResults[q.id]==='partial') cls+=' s-partial';
+      else cls+=' s-err';
+    }
+    inner=`<textarea class="${cls}" id="single-subj-${q.id}" placeholder="답을 입력하세요..." ${already?'disabled':''}>${v}</textarea>`;
+  }
+
+  card.innerHTML=`
+    <div class="sq-num-row">
+      <span class="sq-num-lbl">문제 ${sIdx+1}번</span>
+      <span>${db} ${tb}</span>
+    </div>
+    <div class="sq-text">${q.text}</div>
+    ${q.box?`<div class="sq-box"><strong>〔 보 기 〕</strong>${q.box}</div>`:''}
+    ${inner}`;
+
+  // 해설 (이미 채점된 경우)
+  if(already){
+    document.getElementById('single-exp-text').textContent=q.exp||'';
+    document.getElementById('single-exp-box').classList.add('show');
+  }
+
+  // 액션 버튼
+  document.getElementById('btn-s-check').style.display=already?'none':'block';
+  document.getElementById('btn-s-retry').style.display=already?'block':'none';
+}
+
+function sPick(oi){
+  const q=sQuiz.questions[sIdx];
+  if(sResults[q.id]!==undefined) return;
+  sCurrentPick=oi;
+  q.opts.forEach((_,i)=>{
+    const b=document.getElementById(`sopt-${q.id}-${i}`);
+    if(b){b.classList.remove('s-sel');}
+  });
+  document.getElementById(`sopt-${q.id}-${oi}`)?.classList.add('s-sel');
+}
+
+async function singleCheck(){
+  const q=sQuiz.questions[sIdx];
+  if(q.type==='mc'){
+    if(sCurrentPick===null){alert('선택지를 골라주세요!');return;}
+    sAnswers[q.id]=sCurrentPick;
+    const correct=(sCurrentPick===q.answer);
+    sResults[q.id]=correct?'correct':'wrong';
+    if(correct) showFeedbackBig('correct');
+    else        showFeedbackBig('wrong');
+  } else {
+    const inp=document.getElementById(`single-subj-${q.id}`);
+    const val=(inp?.value||'').trim();
+    if(!val){alert('답을 입력하세요!');return;}
+    sAnswers[q.id]=val;
+    inp.disabled=true;
+    // AI 채점
+    const loadEl=document.createElement('div');
+    loadEl.innerHTML=`<span class="ai-spinner"></span><span style="font-size:12px;color:var(--mute);margin-left:4px">AI 채점 중...</span>`;
+    document.getElementById('single-action-bar').prepend(loadEl);
+    try{
+      const prompt=`한국 과학 채점 AI. 문제: ${q.text} / 키워드: ${(q.keywords||[]).join(',')} / 학생 답: "${val}" / JSON만 출력: {"status":"correct"|"partial"|"wrong","feedback":"30자 이내"}`;
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:120,messages:[{role:'user',content:prompt}]})});
+      const data=await resp.json();
+      const p=JSON.parse((data.content?.[0]?.text||'{"status":"wrong","feedback":""}').replace(/```json|```/g,'').trim());
+      sResults[q.id]=p.status;
+      if(p.status==='correct') showFeedbackBig('correct');
+      else if(p.status==='partial') showFeedbackBig('partial');
+      else showFeedbackBig('wrong');
+    }catch{
+      const ul=val.toLowerCase();
+      const kws=q.keywords||[];
+      const m=kws.filter(k=>ul.includes(k.toLowerCase())).length;
+      const r=kws.length?m/kws.length:0;
+      sResults[q.id]=r>=1?'correct':r>=0.5?'partial':'wrong';
+      showFeedbackBig(sResults[q.id]);
+    }
+    loadEl.remove();
+  }
+  // 팔레트 & 점수 저장 (마지막 문제 완료시)
+  renderSingle();
+  const done=Object.keys(sResults).length;
+  if(done===sQuiz.questions.length){
+    const correct=Object.values(sResults).filter(v=>v==='correct').length;
+    const partial=Object.values(sResults).filter(v=>v==='partial').length;
+    const wrong=sQuiz.questions.length-correct-partial;
+    const score=Math.round((correct+partial*.5)/sQuiz.questions.length*100);
+    await addScore({student:currentUser.name,quizId:sQuiz.id,quizTitle:sQuiz.title,score,correct,wrong,partial,total:sQuiz.questions.length,time:Date.now()});
+  }
+}
+
+function singleRetry(){
+  const q=sQuiz.questions[sIdx];
+  delete sResults[q.id]; delete sAnswers[q.id]; sCurrentPick=null;
+  renderSingle();
+}
+
+function sNav(dir){
+  const nxt=sIdx+dir;
+  if(nxt<0||nxt>=sQuiz.questions.length)return;
+  sIdx=nxt; sCurrentPick=null; renderSingle();
+}
+
+/* ── 개별풀기 피드백 ── */
+function showFeedbackBig(type){
+  const map={correct:['🎉','정답입니다! ✨','#22c55e'],partial:['🤔','부분 정답! 💡','#f0a500'],wrong:['❌','아쉬워요! 다시 확인해요','#ef4444']};
+  const [em,msg,col]=map[type];
+  // 컨페티 (정답만)
+  if(type==='correct'){
+    const cc=document.createElement('div');cc.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:996;overflow:hidden';
+    const cols=['#f0a500','#0d7e8a','#2a9d5c','#e040fb','#ff6b6b'];
+    for(let i=0;i<30;i++){const p=document.createElement('div');p.className='confetti-p';p.style.cssText=`left:${Math.random()*100}%;background:${cols[~~(Math.random()*cols.length)]};--dur:${1.2+Math.random()*1.2}s;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-delay:${Math.random()*.3}s`;cc.appendChild(p);}
+    document.body.appendChild(cc);setTimeout(()=>cc.remove(),2000);
+  }
+  const ov=document.createElement('div');ov.className='feedback-big';
+  ov.innerHTML=`<div class="feedback-emoji">${em}</div><div class="feedback-msg" style="background:${col}">${msg}</div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>ov.remove(),1600);
+}
+
+/* ━━━━ QUIZ ENGINE ━━━━ */
+let currentQuiz=null,currentAnswers={},quizTimerInterval=null,retrySet=null;
+async function startQuiz(quizId,qFilter=null){
+  const qs=await getQuizzes();
+  const qz=qs.find(q=>q.id===quizId);
+  if(!qz){alert('시험지를 찾을 수 없습니다.');return;}
+  currentQuiz={...qz};
+  if(qFilter)currentQuiz.questions=qz.questions.filter(q=>qFilter.includes(q.id));
+  currentAnswers={};show('screen-quiz');
+  document.getElementById('qt-title').textContent=currentQuiz.title;
+  document.getElementById('qt-info').textContent=`${currentUser.name} | ${currentQuiz.questions.length}문항`;
+  renderQuiz();
+  if(currentQuiz.timeLimit>0)startTimer(currentQuiz.timeLimit*60);
+}
+function renderQuiz(){
+  const qs=currentQuiz.questions;
+  const pal=document.getElementById('q-palette');pal.innerHTML='';
+  qs.forEach((q,i)=>{
+    const b=document.createElement('button');b.className='pal-btn';b.id=`pal-${q.id}`;b.textContent=i+1;
+    b.onclick=()=>document.getElementById(`qcard-${q.id}`)?.scrollIntoView({behavior:'smooth',block:'center'});
+    pal.appendChild(b);
+  });
+  const body=document.getElementById('quiz-body');body.innerHTML='';
+  qs.forEach((q,i)=>{
+    const card=document.createElement('div');card.className='q-card';card.id=`qcard-${q.id}`;
+    const db=`<span class="badge badge-${q.diff==='상'?'hard':q.diff==='중'?'mid':'easy'}">${q.diff}</span>`;
+    const tb=`<span class="badge badge-sub">${q.type==='mc'?'객관식':'주관식'}</span>`;
+    let inner='';
+    if(q.type==='mc'){
+      inner=`<ul class="opts-list">${q.opts.map((o,oi)=>`<li><button class="opt-btn" id="opt-${q.id}-${oi}" onclick="pickMC('${q.id}',${oi})">${o}</button></li>`).join('')}</ul>`;
+    } else {
+      inner=`<textarea class="subj-input" id="subj-${q.id}" placeholder="답을 여기에 입력하세요..." oninput="pickSubj('${q.id}')" rows="3"></textarea>`;
+    }
+    card.innerHTML=`<div class="q-num-row"><span class="q-num-lbl">${i+1}번</span><span>${db} ${tb}</span></div>
+    <div class="q-text">${q.text}</div>
+    ${q.box?`<div class="q-box"><strong>〔보 기〕</strong>${q.box}</div>`:''}
+    ${inner}
+    <div class="exp-box" id="exp-${q.id}"><div class="ep-lbl">💡 해설</div><div id="exp-content-${q.id}">${q.exp||''}</div></div>`;
+    body.appendChild(card);
+  });
+  updateProgress();
+}
+function pickMC(qId,oi){
+  const q=currentQuiz.questions.find(x=>x.id===qId);
+  currentAnswers[qId]=oi;
+  q.opts.forEach((_,i)=>{const b=document.getElementById(`opt-${qId}-${i}`);if(b)b.classList.remove('sel');});
+  document.getElementById(`opt-${qId}-${oi}`)?.classList.add('sel');
+  document.getElementById(`pal-${qId}`)?.classList.add('active');
+  updateProgress();
+}
+function pickSubj(qId){
+  const v=document.getElementById(`subj-${qId}`)?.value;
+  currentAnswers[qId]=v||'';
+  const p=document.getElementById(`pal-${qId}`);
+  if(p)p.classList.toggle('active',!!(v&&v.trim()));
+  updateProgress();
+}
+function updateProgress(){
+  const total=currentQuiz.questions.length;
+  const done=Object.keys(currentAnswers).filter(k=>currentAnswers[k]!==null&&currentAnswers[k]!==''&&currentAnswers[k]!==undefined).length;
+  document.getElementById('q-progress').style.width=Math.round(done/total*100)+'%';
+}
+function startTimer(s){
+  quizTimeLeft=s;
+  if(quizTimerInterval)clearInterval(quizTimerInterval);
+  quizTimerInterval=setInterval(()=>{
+    quizTimeLeft--;
+    const m=Math.floor(quizTimeLeft/60),sec=quizTimeLeft%60;
+    document.getElementById('qt-info').textContent=`${currentUser.name} | ⏱️ ${m}:${String(sec).padStart(2,'0')} 남음`;
+    if(quizTimeLeft<=0){clearInterval(quizTimerInterval);submitQuiz();}
+  },1000);
+}
+let quizTimeLeft=0;
+
+/* ━━━━ SUBMIT & SCORING ━━━━ */
+async function submitQuiz(){
+  if(quizTimerInterval){clearInterval(quizTimerInterval);quizTimerInterval=null;}
+  const qs=currentQuiz.questions;
+  const results={};
+  // 객관식 즉시 채점
+  qs.filter(q=>q.type==='mc').forEach(q=>{
+    const a=currentAnswers[q.id];
+    results[q.id]={status:a===q.answer?'correct':'wrong',aiExp:''};
+  });
+  // 주관식 AI 채점
+  const sqs=qs.filter(q=>q.type==='subj');
+  if(sqs.length){
+    sqs.forEach(q=>{
+      const inp=document.getElementById(`subj-${q.id}`);if(inp)inp.disabled=true;
+      const card=document.getElementById(`qcard-${q.id}`);
+      if(card){const ld=document.createElement('div');ld.id=`loading-${q.id}`;ld.innerHTML=`<span class="ai-spinner"></span><span style="font-size:12px;color:var(--mute)">AI 채점 중...</span>`;card.appendChild(ld);}
+    });
+    await Promise.all(sqs.map(async q=>{
+      const ua=String(currentAnswers[q.id]||'').trim();
+      if(!ua){results[q.id]={status:'wrong',aiExp:'미응답'};return;}
+      try{
+        const prompt=`한국 중고등학교 과학 채점 AI입니다.
+문제: ${q.text}
+정답 키워드: ${(q.keywords||[]).join(', ')}
+모범 해설: ${q.exp}
+채점방식: ${q.scoreType==='exact'?'정확 일치':'핵심 키워드 포함 여부'}
+학생 답안: "${ua}"
+JSON만 출력(설명 없이): {"status":"correct"|"partial"|"wrong","feedback":"한국어 30자 이내"}`;
+        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:150,messages:[{role:'user',content:prompt}]})});
+        const data=await resp.json();
+        const txt=data.content?.[0]?.text||'{"status":"wrong","feedback":"채점 오류"}';
+        const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
+        results[q.id]={status:p.status,aiExp:p.feedback};
+      }catch{
+        const ul=(ua||'').toLowerCase();
+        const kws=q.keywords||[];
+        const m=kws.filter(k=>ul.includes(k.toLowerCase())).length;
+        const r=kws.length?m/kws.length:0;
+        results[q.id]={status:r>=1?'correct':r>=0.5?'partial':'wrong',aiExp:`키워드 ${m}/${kws.length}개 포함`};
+      }
+      document.getElementById(`loading-${q.id}`)?.remove();
+    }));
+  }
+  // UI 반영
+  let correct=0,wrong=0,partial=0;
+  qs.forEach(q=>{
+    const r=results[q.id];const card=document.getElementById(`qcard-${q.id}`);const pb=document.getElementById(`pal-${q.id}`);
+    if(!r)return;
+    card.classList.remove('correct','wrong','partial');pb?.classList.remove('active','ok','wrong','partial');
+    if(r.status==='correct'){
+      correct++;card.classList.add('correct');pb?.classList.add('ok');
+      if(q.type==='mc'){
+        q.opts.forEach((_,i)=>{const b=document.getElementById(`opt-${q.id}-${i}`);if(b){b.classList.remove('sel');b.disabled=true;}});
+        document.getElementById(`opt-${q.id}-${currentAnswers[q.id]}`)?.classList.add('cor');
+      } else {const inp=document.getElementById(`subj-${q.id}`);if(inp){inp.classList.add('cor');inp.disabled=true;}}
+    } else if(r.status==='partial'){
+      partial++;card.classList.add('partial');pb?.classList.add('partial');
+      if(q.type==='subj'){const inp=document.getElementById(`subj-${q.id}`);if(inp){inp.classList.add('partial');inp.disabled=true;}}
+    } else {
+      wrong++;card.classList.add('wrong');pb?.classList.add('wrong');
+      if(q.type==='mc'){
+        q.opts.forEach((_,i)=>{const b=document.getElementById(`opt-${q.id}-${i}`);if(b){b.classList.remove('sel');b.disabled=true;}});
+        const ma=currentAnswers[q.id];
+        if(ma!==undefined&&ma!==null)document.getElementById(`opt-${q.id}-${ma}`)?.classList.add('err');
+        document.getElementById(`opt-${q.id}-${q.answer}`)?.classList.add('cor');
+      } else {const inp=document.getElementById(`subj-${q.id}`);if(inp){inp.classList.add('err');inp.disabled=true;}}
+    }
+    const eb=document.getElementById(`exp-${q.id}`);
+    if(eb){
+      const ec=document.getElementById(`exp-content-${q.id}`);
+      if(ec)ec.innerHTML=(q.exp||'')+(r.aiExp?` <span style="font-size:10px;background:#ede9fe;color:#6d28d9;padding:2px 6px;border-radius:8px">AI: ${r.aiExp}</span>`:'');
+      eb.classList.add('show');
+    }
+  });
+  const total=qs.length;const score=Math.round((correct+partial*0.5)/total*100);
+  await addScore({student:currentUser.name,quizId:currentQuiz.id,quizTitle:currentQuiz.title,score,correct,wrong,partial,total,time:Date.now()});
+  retrySet=qs.filter(q=>results[q.id]?.status!=='correct').map(q=>q.id);
+  showResult(score,correct,wrong,partial,total,results,qs);
+}
+function showResult(score,correct,wrong,partial,total,results,qs){
+  show('screen-result');
+  const emoji=score>=90?'🏆':score>=70?'🎉':score>=50?'💪':'😢';
+  document.getElementById('r-emoji').textContent=emoji;
+  document.getElementById('r-score').textContent=score+'점';
+  document.getElementById('r-sub').textContent=`${total}문항 중 정답 ${correct}문항 (부분점수 ${partial}문항)`;
+  document.getElementById('rs-c').textContent=correct;document.getElementById('rs-w').textContent=wrong;document.getElementById('rs-p').textContent=partial;
+  document.getElementById('btn-retry-wrong').style.display=retrySet?.length?'block':'none';
+  const grid=document.getElementById('wrong-grid');grid.innerHTML='';
+  const nc=qs.filter(q=>results[q.id]?.status!=='correct');
+  if(!nc.length){grid.innerHTML='<p style="color:var(--green);font-weight:700;padding:12px">🎊 모두 정답입니다!</p>';return;}
+  nc.forEach(q=>{
+    const r=results[q.id];
+    const ma=q.type==='mc'?(currentAnswers[q.id]!==undefined&&currentAnswers[q.id]!==null?q.opts[currentAnswers[q.id]]:'미응답'):(currentAnswers[q.id]||'미응답');
+    const ca=q.type==='mc'?q.opts[q.answer]:`키워드: ${(q.keywords||[]).join(', ')}`;
+    const d=document.createElement('div');d.className='wr-card';
+    d.innerHTML=`<div class="wr-num">${qs.indexOf(q)+1}번 <span class="badge badge-${q.diff==='상'?'hard':q.diff==='중'?'mid':'easy'}">${q.diff}</span> <span class="badge badge-sub">${q.type==='mc'?'객관식':'주관식'}</span></div>
+    <div class="wr-text">${q.text.substring(0,60)}...</div>
+    <div class="wr-ans"><div class="my">내 답: ${ma}</div><div class="cor">정답: ${ca}</div>${r.aiExp?`<div style="color:var(--teal);font-size:10px">AI: ${r.aiExp}</div>`:''}</div>
+    <div class="wr-exp">💡 ${q.exp}</div>`;
+    grid.appendChild(d);
+  });
+}
+async function retryAll(){await startQuiz(currentQuiz.id);}
+async function retryWrong(){if(retrySet?.length)await startQuiz(currentQuiz.id,retrySet);}
+
+/* ━━━━ ADMIN ━━━━ */
+async function showAdmin(){show('screen-admin');renderAdminQuizList();}
+async function renderAdminQuizList(){
+  const [quizzes,scores]=await Promise.all([getQuizzes(),getScores()]);
+  const div=document.getElementById('admin-quiz-list');div.innerHTML='';
+  if(!quizzes.length){div.innerHTML='<p style="color:var(--mute);text-align:center;padding:30px">시험지가 없습니다.</p>';return;}
+  quizzes.forEach(qz=>{
+    const cnt=scores.filter(s=>s.quizId===qz.id).length;
+    const c=document.createElement('div');c.className='card card-sm';c.style.marginBottom='12px';
+    c.innerHTML=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div><div style="font-size:11px;font-weight:700;color:var(--teal);letter-spacing:1.5px;margin-bottom:3px">${qz.subject} · ${qz.grade}</div>
+      <div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px">${qz.title}</div>
+      <div style="font-size:12px;color:var(--mute)">${qz.questions.length}문항 · 응시 ${cnt}회 · ${qz.createdAt}</div></div>
+      <div style="display:flex;gap:7px;flex-shrink:0">
+        <button class="btn btn-teal btn-sm" onclick="previewQuiz('${qz.id}')">👁 미리보기</button>
+        <button class="btn btn-red btn-sm" onclick="deleteQuiz('${qz.id}')">🗑 삭제</button>
+      </div></div>`;
+    div.appendChild(c);
+  });
+}
+async function previewQuiz(id){const prev=currentUser;currentUser={name:'관리자(미리보기)',role:'student'};await startQuiz(id);currentUser=prev;}
+async function deleteQuiz(id){if(!confirm('정말 삭제하시겠습니까?'))return;const q=await getQuizzes();await sSet(SK.QUIZZES,q.filter(x=>x.id!==id));renderAdminQuizList();}
+
+/* ━━━━ FILE UPLOAD & AI PARSE ━━━━ */
+let parsedQuestions=[];
+
+function handleFileDrop(e){
+  e.preventDefault();document.getElementById('upload-zone').classList.remove('drag');
+  const file=e.dataTransfer.files[0];if(file)readFile(file);
+}
+function handleFileSelect(e){const file=e.target.files[0];if(file)readFile(file);}
+function readFile(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    document.getElementById('paste-input').value=ev.target.result;
+    document.getElementById('upload-quiz-form').style.display='block';
+    document.getElementById('upload-action-btns').style.display='none';
+    // 파일명에서 제목 자동 추출
+    const base=file.name.replace(/\.[^.]+$/,'');
+    if(!document.getElementById('up-title').value)document.getElementById('up-title').value=base;
+  };
+  reader.readAsText(file,'utf-8');
+}
+
+async function parseAndPreview(){
+  const raw=document.getElementById('paste-input').value.trim();
+  if(!raw){alert('문제 내용을 입력하거나 파일을 업로드하세요.');return;}
+  const prog=document.getElementById('upload-progress');
+  const bar=document.getElementById('up-bar');
+  const log=document.getElementById('up-log');
+  prog.classList.add('show');log.textContent='AI가 문제를 분석 중입니다...';bar.style.width='15%';
+
+  // JSON 직접 파싱 시도
+  if(raw.trim().startsWith('[')){
+    try{
+      const data=JSON.parse(raw);
+      parsedQuestions=data.map((q,i)=>({
+        id:'uq_'+Date.now()+'_'+i,
+        type:q.type||'mc',diff:q.diff||'중',text:q.text||q.question||'',
+        opts:q.opts||q.options||[],answer:typeof q.answer==='number'?q.answer:0,
+        keywords:q.keywords||[],scoreType:q.scoreType||'keyword',
+        exp:q.exp||q.explanation||''
+      }));
+      bar.style.width='100%';log.textContent=`✅ JSON 직접 파싱 완료: ${parsedQuestions.length}문항`;
+      setTimeout(()=>prog.classList.remove('show'),1500);
+      showParsePreview();return;
+    }catch{}
+  }
+
+  // AI 파싱
+  bar.style.width='30%';
+  const prompt=`당신은 한국 교육 문제 파싱 전문가입니다.
+아래 텍스트에서 모든 문제를 파싱하여 JSON 배열로 출력하세요.
+각 문제는 다음 형식을 따르세요:
+{
+  "type": "mc" (객관식) 또는 "subj" (주관식),
+  "diff": "상" 또는 "중" 또는 "하",
+  "text": "문제 본문 (보기 제외)",
+  "box": "보기 내용 (없으면 null)",
+  "opts": ["① 선지1", "② 선지2", ...] (객관식만, 주관식은 []),
+  "answer": 정답 인덱스 숫자 (객관식, 0부터 시작),
+  "keywords": ["키워드1", "키워드2"] (주관식만),
+  "scoreType": "exact" 또는 "keyword",
+  "exp": "해설 내용"
+}
+규칙:
+- 번호(1., 2., [1], (1) 등)로 구분된 모든 문제를 빠짐없이 파싱
+- 객관식: ①②③④⑤ 또는 1)2)3) 형식의 선지 포함
+- 주관식: 서술형, 빈칸 채우기, 단답형 문제
+- 난이도가 명시되지 않으면 "중"으로 설정
+- 정답이 명시된 경우 반드시 포함
+- JSON 배열만 출력, 다른 텍스트 없이
+
+텍스트:
+${raw.substring(0,8000)}`;
+
+  try{
+    bar.style.width='50%';log.textContent='AI가 문제 구조를 분석 중...';
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+    });
+    bar.style.width='80%';log.textContent='파싱 결과를 처리 중...';
+    const data=await resp.json();
+    const txt=data.content?.[0]?.text||'[]';
+    const clean=txt.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    parsedQuestions=parsed.map((q,i)=>({
+      id:'uq_'+Date.now()+'_'+i,...q,
+      opts:q.opts||[],keywords:q.keywords||[]
+    }));
+    bar.style.width='100%';log.textContent=`✅ AI 분석 완료: ${parsedQuestions.length}문항 인식`;
+    setTimeout(()=>prog.classList.remove('show'),1500);
+    showParsePreview();
+  }catch(e){
+    bar.style.width='100%';log.textContent='⚠️ AI 분석 실패. JSON 형식을 확인하거나 다시 시도하세요.';
+    setTimeout(()=>prog.classList.remove('show'),2500);
+  }
+}
+
+function showParsePreview(){
+  const pp=document.getElementById('parse-preview');pp.classList.add('show');
+  document.getElementById('pp-count').textContent=parsedQuestions.length;
+  document.getElementById('upload-quiz-form').style.display='block';
+  document.getElementById('btn-save-upload').style.display='block';
+  document.getElementById('upload-action-btns').style.display='none';
+  const list=document.getElementById('pp-list');list.innerHTML='';
+  parsedQuestions.forEach((q,i)=>{
+    const d=document.createElement('div');d.className='pp-item';
+    const db=`<span class="badge badge-${q.diff==='상'?'hard':q.diff==='중'?'mid':'easy'}">${q.diff}</span>`;
+    const tb=`<span class="badge badge-sub">${q.type==='mc'?'객관식':'주관식'}</span>`;
+    d.innerHTML=`<div class="pp-num">${i+1}</div><div class="pp-text">${q.text.substring(0,70)}${q.text.length>70?'...':''}</div><div class="pp-badge">${db} ${tb}</div>`;
+    list.appendChild(d);
+  });
+}
+
+async function saveUploadedQuiz(){
+  const title=document.getElementById('up-title').value.trim();
+  const subject=document.getElementById('up-subject').value.trim();
+  if(!title||!subject){alert('시험 제목과 과목을 입력하세요.');return;}
+  if(!parsedQuestions.length){alert('파싱된 문제가 없습니다.');return;}
+  const grade=document.getElementById('up-grade').value;
+  const timeLimit=parseInt(document.getElementById('up-time').value)||0;
+  const newQuiz={id:'quiz_'+Date.now(),title,subject,grade,timeLimit,
+    desc:`업로드 시험지 (${parsedQuestions.length}문항)`,
+    createdAt:new Date().toLocaleDateString('ko-KR'),questions:parsedQuestions};
+  const qs=await getQuizzes();qs.push(newQuiz);await sSet(SK.QUIZZES,qs);
+  alert(`✅ "${title}" 시험지가 저장되었습니다! (${parsedQuestions.length}문항)`);
+  // 초기화
+  document.getElementById('paste-input').value='';
+  document.getElementById('parse-preview').classList.remove('show');
+  document.getElementById('upload-quiz-form').style.display='none';
+  document.getElementById('upload-action-btns').style.display='flex';
+  document.getElementById('btn-save-upload').style.display='none';
+  parsedQuestions=[];
+  switchTab('tab-quizzes',document.querySelector('.tab-btn'));
+}
+
+/* ━━━━ 직접 만들기 ━━━━ */
+let qBuilderItems=[],qItemCounter=0,optCounter=0;
+function addQuestion(type){
+  qItemCounter++;const idx=qItemCounter;
+  const wrap=document.createElement('div');wrap.className='quiz-builder';wrap.id=`qb-${idx}`;
+  if(type==='mc'){
+    wrap.innerHTML=`<div class="qb-header"><h3>📌 객관식 문제 #${idx}</h3><button class="btn btn-ghost btn-sm" onclick="removeQB(${idx})">✕</button></div>
+    <div class="qb-row"><div class="form-group"><label>난이도</label><select id="qb-diff-${idx}"><option>상</option><option>중</option><option>하</option></select></div>
+    <div class="form-group"><label>보기 박스 (선택)</label><input type="text" id="qb-box-${idx}" placeholder="보기 내용 (없으면 비워두세요)"></div></div>
+    <div class="form-group qb-row full" style="margin-bottom:10px"><label>문제 내용</label><textarea id="qb-text-${idx}" rows="3" placeholder="문제 내용"></textarea></div>
+    <div class="opts-builder" id="opts-builder-${idx}">
+      <label style="font-size:10px;font-weight:700;color:var(--mute);display:block;margin-bottom:6px">선지 (✅ 체크 = 정답)</label>
+      <div id="opts-list-${idx}"></div>
+      <button class="add-opt-btn" onclick="addOpt(${idx})">+ 선지 추가</button>
+    </div>
+    <div class="form-group qb-row full" style="margin-top:10px"><label>해설</label><input type="text" id="qb-exp-${idx}" placeholder="해설"></div>`;
+    document.getElementById('questions-builder').appendChild(wrap);
+    for(let i=0;i<5;i++)addOpt(idx,i===0);
+  } else {
+    wrap.innerHTML=`<div class="qb-header"><h3>✍️ 주관식 문제 #${idx}</h3><button class="btn btn-ghost btn-sm" onclick="removeQB(${idx})">✕</button></div>
+    <div class="qb-row"><div class="form-group"><label>난이도</label><select id="qb-diff-${idx}"><option>상</option><option>중</option><option>하</option></select></div>
+    <div class="form-group"><label>채점 방식</label><select id="qb-score-type-${idx}"><option value="exact">정확 일치</option><option value="keyword">키워드 포함</option><option value="ai">AI 채점</option></select></div></div>
+    <div class="form-group qb-row full" style="margin-bottom:10px"><label>문제 내용</label><textarea id="qb-text-${idx}" rows="3" placeholder="문제 내용"></textarea></div>
+    <div class="form-group qb-row full" style="margin-bottom:10px"><label>정답 키워드 (쉼표 구분)</label><input type="text" id="qb-keywords-${idx}" placeholder="예: 아밀레이스, 녹말, 엿당"></div>
+    <div class="form-group qb-row full"><label>해설 / 모범 답안</label><textarea id="qb-exp-${idx}" rows="2" placeholder="해설"></textarea></div>`;
+    document.getElementById('questions-builder').appendChild(wrap);
+  }
+  qBuilderItems.push({idx,type});
+}
+function addOpt(qIdx,isFirst=false){
+  optCounter++;const oc=optCounter;
+  const list=document.getElementById(`opts-list-${qIdx}`);
+  const row=document.createElement('div');row.className='ob-row';row.id=`ob-${qIdx}-${oc}`;
+  row.innerHTML=`<input type="checkbox" class="cor-check" id="cor-${qIdx}-${oc}" name="cor-${qIdx}">
+  <input type="text" id="opt-text-${qIdx}-${oc}" placeholder="선지 내용">
+  <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ob-${qIdx}-${oc}').remove()">✕</button>`;
+  list.appendChild(row);
+  if(isFirst)document.getElementById(`cor-${qIdx}-${oc}`).checked=true;
+}
+function removeQB(idx){document.getElementById(`qb-${idx}`)?.remove();qBuilderItems=qBuilderItems.filter(x=>x.idx!==idx);}
+async function saveQuiz(){
+  const title=document.getElementById('new-title').value.trim();
+  const subject=document.getElementById('new-subject').value.trim();
+  const grade=document.getElementById('new-grade').value;
+  const timeLimit=parseInt(document.getElementById('new-time').value)||0;
+  if(!title||!subject){alert('제목과 과목을 입력하세요.');return;}
+  if(!qBuilderItems.length){alert('최소 1문제 이상 추가하세요.');return;}
+  const questions=[];
+  for(const item of qBuilderItems){
+    const idx=item.idx;
+    const text=document.getElementById(`qb-text-${idx}`)?.value.trim();
+    const diff=document.getElementById(`qb-diff-${idx}`)?.value;
+    const exp=document.getElementById(`qb-exp-${idx}`)?.value.trim();
+    const box=document.getElementById(`qb-box-${idx}`)?.value.trim();
+    if(!text){alert(`${idx}번 문제 내용을 입력하세요.`);return;}
+    const qId='q_'+Date.now()+'_'+idx;
+    if(item.type==='mc'){
+      const optRows=document.getElementById(`opts-list-${idx}`)?.querySelectorAll('.ob-row')||[];
+      const opts=[];let answerIdx=-1;
+      optRows.forEach(r=>{const t=r.querySelector('input[type="text"]')?.value.trim();const c=r.querySelector('input[type="checkbox"]')?.checked;if(t){opts.push(t);if(c)answerIdx=opts.length-1;}});
+      if(opts.length<2){alert(`${idx}번 문제 선지를 2개 이상 입력하세요.`);return;}
+      if(answerIdx<0){alert(`${idx}번 문제 정답 선지를 체크하세요.`);return;}
+      questions.push({id:qId,type:'mc',diff,text,opts,answer:answerIdx,exp,box:box||undefined});
+    } else {
+      const keywords=(document.getElementById(`qb-keywords-${idx}`)?.value||'').split(',').map(s=>s.trim()).filter(Boolean);
+      const scoreType=document.getElementById(`qb-score-type-${idx}`)?.value||'keyword';
+      questions.push({id:qId,type:'subj',diff,text,keywords,scoreType,exp});
+    }
+  }
+  const newQuiz={id:'quiz_'+Date.now(),title,subject,grade,desc:'',timeLimit,createdAt:new Date().toLocaleDateString('ko-KR'),questions};
+  const qs=await getQuizzes();qs.push(newQuiz);await sSet(SK.QUIZZES,qs);
+  alert(`✅ "${title}" 저장! (${questions.length}문항)`);
+  document.getElementById('questions-builder').innerHTML='';
+  document.getElementById('new-title').value='';document.getElementById('new-subject').value='';
+  qBuilderItems=[];switchTab('tab-quizzes',document.querySelector('.tab-btn'));renderAdminQuizList();
+}
+
+/* ━━━━ SCORE TABLE ━━━━ */
+async function renderScoreTable(){
+  const [scores,quizzes]=await Promise.all([getScores(),getQuizzes()]);
+  const f=document.getElementById('score-quiz-filter');const cv=f.value;
+  f.innerHTML='<option value="">전체 시험</option>';
+  quizzes.forEach(q=>{f.innerHTML+=`<option value="${q.id}">${q.title}</option>`;});
+  f.value=cv;
+  const fs=cv?scores.filter(s=>s.quizId===cv):scores;
+  document.getElementById('score-tbody').innerHTML=[...fs].sort((a,b)=>b.time-a.time).map(s=>{
+    const cls=s.score>=80?'sp-high':s.score>=60?'sp-mid':'sp-low';
+    return `<tr><td>${s.student}</td><td>${s.quizTitle}</td><td><span class="score-pill ${cls}">${s.score}점</span></td><td>${s.correct}/${s.total}</td><td>${new Date(s.time).toLocaleString('ko-KR')}</td></tr>`;
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--mute);padding:20px">기록 없음</td></tr>';
+}
+function exportScores(){
+  getScores().then(scores=>{
+    const rows=['\uFEFF학생,시험명,점수,정답,오답,부분점수,전체,응시일시'];
+    scores.forEach(s=>rows.push(`${s.student},${s.quizTitle},${s.score},${s.correct},${s.wrong},${s.partial||0},${s.total},${new Date(s.time).toLocaleString('ko-KR')}`));
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8'}));
+    a.download='이든X학원_점수_'+new Date().toLocaleDateString('ko-KR')+'.csv';a.click();
+  });
+}
+
+/* ━━━━ STUDENT TABLE ━━━━ */
+async function renderStudentTable(){
+  const [students,scores]=await Promise.all([getStudents(),getScores()]);
+  document.getElementById('students-tbody').innerHTML=students.map((s,i)=>{
+    const ms=scores.filter(x=>x.student===s.name);
+    const avg=ms.length?Math.round(ms.reduce((a,b)=>a+b.score,0)/ms.length):'-';
+    return `<tr><td>${i+1}</td><td>${s.name}</td><td><code>${s.pw}</code></td><td>${ms.length}회</td><td>${avg!=='-'?avg+'점':'-'}</td>
+    <td><button class="btn btn-ghost btn-sm" onclick="removeStudent('${s.name}')">삭제</button></td></tr>`;
+  }).join('');
+}
+async function addStudent(){
+  const name=document.getElementById('new-stu-name').value.trim();
+  const pw=document.getElementById('new-stu-pw').value.trim();
+  if(!name||!pw){alert('이름과 비밀번호를 입력하세요.');return;}
+  const s=await getStudents();if(s.find(x=>x.name===name)){alert('이미 존재하는 이름입니다.');return;}
+  s.push({name,pw});await sSet(SK.STUDENTS,s);closeModal('add-student-modal');renderStudentTable();
+}
+async function removeStudent(name){
+  if(!confirm(`"${name}" 학생을 삭제하시겠습니까?`))return;
+  const s=await getStudents();await sSet(SK.STUDENTS,s.filter(x=>x.name!==name));renderStudentTable();
+}
+
+/* ━━━━ MODAL ━━━━ */
+function openModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+
+/* ━━━━ CONFETTI ━━━━ */
+function showConfetti(){
+  const cols=['#f0a500','#0d7e8a','#2a9d5c','#e040fb','#ff6b6b'];
+  const c=document.createElement('div');c.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:996;overflow:hidden';
+  for(let i=0;i<36;i++){const p=document.createElement('div');p.className='confetti-p';p.style.cssText=`left:${Math.random()*100}%;background:${cols[~~(Math.random()*cols.length)]};--dur:${1.2+Math.random()*1.5}s;width:${6+Math.random()*9}px;height:${6+Math.random()*9}px;animation-delay:${Math.random()*.4}s`;c.appendChild(p);}
+  document.body.appendChild(c);
+  const fb=document.createElement('div');fb.className='fb-overlay';fb.innerHTML='<div class="fb-bubble">🎉</div>';document.body.appendChild(fb);
+  const ft=document.createElement('div');ft.className='fb-text';ft.textContent=['🏆 완벽해요!','⭐ 훌륭해요!','🎊 정확해요!'][~~(Math.random()*3)];document.body.appendChild(ft);
+  setTimeout(()=>{c.remove();fb.remove();ft.remove();},2000);
+}
+</script>
+</body>
+</html>

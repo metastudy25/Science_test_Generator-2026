@@ -453,105 +453,87 @@ body{font-family:var(--font);background:var(--gray);color:var(--text);min-height
 
   <!-- 탭2: 파일 업로드 -->
   <div class="tab-panel" id="tab-upload">
-    <div class="card" style="margin-bottom:16px">
-      <h3 style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:6px">📂 문제 파일 업로드</h3>
-      <p style="font-size:12px;color:var(--mute);margin-bottom:16px;line-height:1.7">
-        문서 파일(.txt, .md, .json)이나 JSON 형식 파일을 업로드하면 AI가 자동으로 문제를 파싱합니다.<br>
-        또는 아래 텍스트 박스에 문제를 직접 붙여넣기 하세요.
-      </p>
-      <!-- 드래그앤드롭 업로드 존 -->
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:14px">📋 STEP 1 — 시험지 정보</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="form-group"><label>시험 제목 *</label><input type="text" id="up-title" placeholder="예: 2학기 중간고사 순환 단원"></div>
+        <div class="form-group"><label>과목 *</label><input type="text" id="up-subject" placeholder="예: 과학, 영어, 수학"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label>학년</label>
+          <select id="up-grade"><option>중학교 1학년</option><option selected>중학교 2학년</option><option>중학교 3학년</option><option>고등학교 1학년</option><option>전체</option></select>
+        </div>
+        <div class="form-group"><label>제한 시간(분, 0=무제한)</label><input type="number" id="up-time" value="0" min="0"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:6px">📝 STEP 2 — 문제 붙여넣기 / 파일 업로드</div>
+      <p style="font-size:12px;color:var(--mute);margin-bottom:12px;line-height:1.7">보고서 형식 문서를 <strong>그대로 붙여넣으세요.</strong> 번호·선지(①②③④⑤)·정답·해설이 있으면 자동 인식됩니다.</p>
       <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
            ondragover="event.preventDefault();this.classList.add('drag')"
            ondragleave="this.classList.remove('drag')"
            ondrop="handleFileDrop(event)">
-        <div class="uz-icon">📄</div>
-        <h3>파일을 드래그하거나 클릭하여 업로드</h3>
-        <p>문제가 담긴 텍스트 파일을 업로드하면 AI가 자동으로 분석합니다</p>
-        <div class="uz-formats">
-          <span class="format-badge">.txt</span>
-          <span class="format-badge">.md</span>
-          <span class="format-badge">.json</span>
-        </div>
+        <div class="uz-icon">📂</div>
+        <h3>파일 클릭/드래그 업로드 (.txt .md)</h3>
+        <p>파일을 올리면 아래 텍스트 박스에 자동으로 채워집니다</p>
       </div>
       <input type="file" id="file-input" accept=".txt,.md,.json" style="display:none" onchange="handleFileSelect(event)">
+      <textarea id="paste-input" style="width:100%;height:280px;padding:12px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;font-family:var(--font);resize:vertical;outline:none;line-height:1.7;margin-top:12px" placeholder="여기에 문제를 붙여넣으세요.
 
-      <!-- 텍스트 직접 입력 -->
-      <div style="margin-top:16px">
-        <label style="font-size:12px;font-weight:700;color:var(--navy);display:block;margin-bottom:8px">📝 또는 문제를 직접 붙여넣기</label>
-        <textarea id="paste-input" style="width:100%;height:180px;padding:12px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;font-family:var(--font);resize:vertical;outline:none;line-height:1.7" placeholder="문제 내용을 여기에 붙여넣으세요...&#10;&#10;지원 형식:&#10;• 마크다운 형식 (## 제목, 번호. 내용)&#10;• 일반 텍스트 형식 (1번, 2번... 또는 [1], [2]...)&#10;• JSON 배열 형식"></textarea>
-      </div>
+예시:
+[1번] 좌심실이 수축할 때 판막 A, B의 상태는?
+① A와 B 모두 열린다.
+② A와 B 모두 닫힌다.
+③ A는 열리고, B는 닫힌다.
+④ A는 닫히고, B는 열린다.
+⑤ A와 B 모두 수축한다.
+정답: ④
+해설: 좌심실 수축 시 A(심방-심실)는 닫히고 B(심실-동맥)는 열린다.
 
-      <!-- 업로드 진행 -->
-      <div class="upload-progress" id="upload-progress">
-        <div class="up-log" id="up-log">AI가 문제를 분석 중입니다...</div>
+[2번] 혈류 속도가 모세 혈관에서 가장 느린 이유는?
+정답: 총 단면적이 가장 넓기 때문이다.
+키워드: 단면적, 넓다
+해설: 모세 혈관은 총 단면적이 가장 넓어 혈류 속도가 가장 느리다."></textarea>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px">⚙️ STEP 3 — 파싱 실행</div>
+      <button class="btn btn-teal" style="width:100%;padding:14px;font-size:15px;font-weight:800" onclick="parseAndPreview()">🔍 문제 파싱 시작</button>
+      <div class="upload-progress" id="upload-progress" style="margin-top:12px">
+        <div class="up-log" id="up-log">분석 중...</div>
         <div class="up-bar-wrap"><div class="up-bar-fill" id="up-bar" style="width:0%"></div></div>
       </div>
-
-      <!-- 미리보기 -->
-      <div class="parse-preview" id="parse-preview">
+      <div class="parse-preview" id="parse-preview" style="margin-top:12px">
         <div class="pp-title">✅ 파싱 완료 — <span id="pp-count">0</span>문항 인식됨</div>
         <div class="pp-list" id="pp-list"></div>
-      </div>
-
-      <!-- 시험지 정보 입력 (파싱 후 표시) -->
-      <div id="upload-quiz-form" style="display:none;margin-top:16px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div class="form-group"><label>시험 제목</label><input type="text" id="up-title" placeholder="예: 2학기 중간고사 과학"></div>
-          <div class="form-group"><label>과목</label><input type="text" id="up-subject" placeholder="예: 과학, 영어, 수학"></div>
+        <div style="margin-top:14px">
+          <button class="btn btn-gold" style="width:100%;padding:13px;font-size:15px;font-weight:800" onclick="saveUploadedQuiz()">💾 시험지 저장 &amp; 등록</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-          <div class="form-group"><label>학년</label>
-            <select id="up-grade"><option>중학교 1학년</option><option selected>중학교 2학년</option><option>중학교 3학년</option><option>고등학교 1학년</option><option>전체</option></select>
-          </div>
-          <div class="form-group"><label>제한 시간 (분, 0=무제한)</label><input type="number" id="up-time" value="0" min="0"></div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-teal" onclick="parseAndPreview()">🔍 AI 분석</button>
-          <button class="btn btn-gold" id="btn-save-upload" onclick="saveUploadedQuiz()" style="display:none">💾 시험지 저장</button>
-        </div>
-      </div>
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap" id="upload-action-btns">
-        <button class="btn btn-teal" onclick="parseAndPreview()">🔍 AI 분석 시작</button>
       </div>
     </div>
 
-    <!-- 업로드 형식 가이드 -->
     <div class="card card-sm">
-      <h3 style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px">📌 지원 입력 형식 예시</h3>
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px">📌 인식 가능한 문제 형식</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <div>
-          <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">▶ 마크다운 / 일반 텍스트</div>
-          <pre style="background:var(--gray);border-radius:7px;padding:10px;font-size:11px;line-height:1.7;overflow-x:auto">1. 세포의 기본 단위는?
-① 세포  ② 조직  ③ 기관
-④ 기관계  ⑤ 개체
-정답: ①
-해설: 세포=생물체의 기본 단위
-
-2. 아밀레이스가 분해하는 것은?
-(주관식)
-정답: 녹말(엿당으로 분해)
-키워드: 녹말, 엿당</pre>
+          <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">✅ 객관식</div>
+          <pre style="background:var(--gray);border-radius:7px;padding:10px;font-size:11px;line-height:1.8;overflow-x:auto;white-space:pre-wrap">[1번] 문제 내용
+① 선지1  ② 선지2
+③ 선지3  ④ 선지4  ⑤ 선지5
+정답: ④
+해설: 해설 내용</pre>
         </div>
         <div>
-          <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">▶ JSON 형식</div>
-          <pre style="background:var(--gray);border-radius:7px;padding:10px;font-size:11px;line-height:1.7;overflow-x:auto">[
-  {
-    "type": "mc",
-    "diff": "중",
-    "text": "문제 내용",
-    "opts": ["① A","② B","③ C"],
-    "answer": 0,
-    "exp": "해설 내용"
-  },
-  {
-    "type": "subj",
-    "diff": "상",
-    "text": "주관식 문제",
-    "keywords": ["키워드1"],
-    "exp": "모범 답안"
-  }
-]</pre>
+          <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">✅ 주관식</div>
+          <pre style="background:var(--gray);border-radius:7px;padding:10px;font-size:11px;line-height:1.8;overflow-x:auto;white-space:pre-wrap">[2번] 문제 내용
+정답: 정답 내용
+키워드: 키워드1, 키워드2
+해설: 해설 내용</pre>
         </div>
+      </div>
+      <div style="margin-top:10px;padding:10px;background:#fff7e6;border-radius:8px;font-size:12px;color:#b06a00">
+        💡 보고서 형식 문서를 그대로 붙여넣으면 됩니다. [N번], N. N번 형태의 번호와 ①②③④⑤ 선지가 있으면 자동 인식합니다.
       </div>
     </div>
   </div>
@@ -3021,87 +3003,167 @@ function readFile(file){
 }
 
 async function parseAndPreview(){
-  const raw=document.getElementById('paste-input').value.trim();
+  var raw=document.getElementById('paste-input').value.trim();
   if(!raw){alert('문제 내용을 입력하거나 파일을 업로드하세요.');return;}
-  const prog=document.getElementById('upload-progress');
-  const bar=document.getElementById('up-bar');
-  const log=document.getElementById('up-log');
-  prog.classList.add('show');log.textContent='AI가 문제를 분석 중입니다...';bar.style.width='15%';
+  var prog=document.getElementById('upload-progress');
+  var bar=document.getElementById('up-bar');
+  var log=document.getElementById('up-log');
+  prog.classList.add('show');
+  log.textContent='문제를 분석 중입니다...';
+  bar.style.width='10%';
 
-  // JSON 직접 파싱 시도
-  if(raw.trim().startsWith('[')){
+  /* JSON 직접 파싱 */
+  if(raw.trim().charAt(0)==='['){
     try{
-      const data=JSON.parse(raw);
-      parsedQuestions=data.map((q,i)=>({
-        id:'uq_'+Date.now()+'_'+i,
-        type:q.type||'mc',diff:q.diff||'중',text:q.text||q.question||'',
-        opts:q.opts||q.options||[],answer:typeof q.answer==='number'?q.answer:0,
-        keywords:q.keywords||[],scoreType:q.scoreType||'keyword',
-        exp:q.exp||q.explanation||''
-      }));
-      bar.style.width='100%';log.textContent=`✅ JSON 직접 파싱 완료: ${parsedQuestions.length}문항`;
-      setTimeout(()=>prog.classList.remove('show'),1500);
-      showParsePreview();return;
-    }catch{}
+      var data=JSON.parse(raw);
+      parsedQuestions=data.map(function(q,i){
+        return {
+          id:'uq_'+Date.now()+'_'+i,
+          type:q.type||'mc', diff:q.diff||'중',
+          text:q.text||q.question||'',
+          box:q.box||null,
+          opts:q.opts||q.options||[],
+          answer:typeof q.answer==='number'?q.answer:0,
+          keywords:q.keywords||[],
+          scoreType:q.scoreType||'keyword',
+          exp:q.exp||q.explanation||''
+        };
+      });
+      bar.style.width='100%';
+      log.textContent='✅ JSON 파싱 완료: '+parsedQuestions.length+'문항';
+      setTimeout(function(){prog.classList.remove('show');},1200);
+      showParsePreview();
+      return;
+    }catch(e){}
   }
 
-  // AI 파싱
   bar.style.width='30%';
-  const prompt=`당신은 한국 교육 문제 파싱 전문가입니다.
-아래 텍스트에서 모든 문제를 파싱하여 JSON 배열로 출력하세요.
-각 문제는 다음 형식을 따르세요:
-{
-  "type": "mc" (객관식) 또는 "subj" (주관식),
-  "diff": "상" 또는 "중" 또는 "하",
-  "text": "문제 본문 (보기 제외)",
-  "box": "보기 내용 (없으면 null)",
-  "opts": ["① 선지1", "② 선지2", ...] (객관식만, 주관식은 []),
-  "answer": 정답 인덱스 숫자 (객관식, 0부터 시작),
-  "keywords": ["키워드1", "키워드2"] (주관식만),
-  "scoreType": "exact" 또는 "keyword",
-  "exp": "해설 내용"
-}
-규칙:
-- 번호(1., 2., [1], (1) 등)로 구분된 모든 문제를 빠짐없이 파싱
-- 객관식: ①②③④⑤ 또는 1)2)3) 형식의 선지 포함
-- 주관식: 서술형, 빈칸 채우기, 단답형 문제
-- 난이도가 명시되지 않으면 "중"으로 설정
-- 정답이 명시된 경우 반드시 포함
-- JSON 배열만 출력, 다른 텍스트 없이
+  log.textContent='문제 구조를 인식 중...';
 
-텍스트:
-${raw.substring(0,8000)}`;
+  parsedQuestions=parseQuizText(raw);
 
-  try{
-    bar.style.width='50%';log.textContent='AI가 문제 구조를 분석 중...';
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]})
-    });
-    bar.style.width='80%';log.textContent='파싱 결과를 처리 중...';
-    const data=await resp.json();
-    const txt=data.content?.[0]?.text||'[]';
-    const clean=txt.replace(/```json|```/g,'').trim();
-    const parsed=JSON.parse(clean);
-    parsedQuestions=parsed.map((q,i)=>({
-      id:'uq_'+Date.now()+'_'+i,...q,
-      opts:q.opts||[],keywords:q.keywords||[]
-    }));
-    bar.style.width='100%';log.textContent=`✅ AI 분석 완료: ${parsedQuestions.length}문항 인식`;
-    setTimeout(()=>prog.classList.remove('show'),1500);
+  bar.style.width='100%';
+  if(parsedQuestions.length===0){
+    log.textContent='⚠️ 문제를 인식하지 못했습니다. 형식을 확인하고 다시 시도하세요.';
+  } else {
+    log.textContent='✅ 파싱 완료: '+parsedQuestions.length+'문항 인식';
+    setTimeout(function(){prog.classList.remove('show');},1200);
     showParsePreview();
-  }catch(e){
-    bar.style.width='100%';log.textContent='⚠️ AI 분석 실패. JSON 형식을 확인하거나 다시 시도하세요.';
-    setTimeout(()=>prog.classList.remove('show'),2500);
   }
 }
 
+function parseQuizText(raw){
+  var NL=String.fromCharCode(10);
+  var questions=[];
+  var lines=raw.split(NL);
+  var blocks=[];
+  var cur=[];
+  var numRe=/^[\[【(]?\s*\d+\s*[번番\]】).]?\s/;
+
+  for(var li=0;li<lines.length;li++){
+    var line=lines[li];
+    if(numRe.test(line.trim()) && cur.length>0){
+      blocks.push(cur.join(NL));
+      cur=[line];
+    } else {
+      cur.push(line);
+    }
+  }
+  if(cur.length) blocks.push(cur.join(NL));
+
+  var circMap={'①':0,'②':1,'③':2,'④':3,'⑤':4,'⑥':5,'⑦':6,'⑧':7};
+  var circNums='①②③④⑤⑥⑦⑧';
+
+  for(var bi=0;bi<blocks.length;bi++){
+    var block=blocks[bi];
+    if(!block.trim()) continue;
+    var blines=block.split(NL).map(function(l){return l.trim();}).filter(function(l){return l.length>0;});
+    if(!blines.length) continue;
+
+    var firstLine=blines[0].replace(/^[\[【(]?\s*\d+\s*[번番\]】).]?\s*/,'').trim();
+    var optLines=[];
+    var answerLines=[];
+    var expLines=[];
+    var boxLines=[];
+    var kwLines=[];
+    var textLines=[firstLine];
+    var inBox=false;
+
+    for(var li2=1;li2<blines.length;li2++){
+      var l=blines[li2];
+      if(/^[<〈【\[]?\s*보\s*기/.test(l)||/^보\s*기/.test(l)){inBox=true;continue;}
+      if(inBox&&/^[>〉】\]]/.test(l)){inBox=false;continue;}
+      if(inBox){boxLines.push(l);continue;}
+      if(/^정\s*답\s*[:：]/.test(l)){answerLines.push(l.replace(/^정\s*답\s*[:：]\s*/,'').trim());continue;}
+      if(/^해\s*설\s*[:：]/.test(l)){expLines.push(l.replace(/^해\s*설\s*[:：]\s*/,'').trim());continue;}
+      if(/^키\s*워\s*드\s*[:：]/.test(l)){kwLines.push(l.replace(/^키\s*워\s*드\s*[:：]\s*/,'').trim());continue;}
+      if(circNums.indexOf(l.charAt(0))>-1){
+        var multiOpt=l.match(/[①②③④⑤⑥⑦⑧][^①②③④⑤⑥⑦⑧]+/g);
+        if(multiOpt){for(var oi=0;oi<multiOpt.length;oi++)optLines.push(multiOpt[oi].trim());}
+        else optLines.push(l);
+        continue;
+      }
+      if(optLines.length===0&&answerLines.length===0) textLines.push(l);
+    }
+
+    var questionText=textLines.join(' ').trim();
+    if(!questionText) continue;
+
+    var isMC=optLines.length>=2;
+    var ts=Date.now();
+
+    if(isMC){
+      var answerIdx=0;
+      if(answerLines.length){
+        var a=answerLines[0].trim();
+        if(circMap.hasOwnProperty(a.charAt(0))) answerIdx=circMap[a.charAt(0)];
+        else if(/^\d/.test(a)) answerIdx=parseInt(a,10)-1;
+      }
+      var opts=optLines.map(function(o,i){
+        var cleaned=o.replace(/^[①②③④⑤⑥⑦⑧]\s*/,'').trim();
+        return circNums.charAt(i)+(cleaned?' '+cleaned:'');
+      });
+      questions.push({
+        id:'uq_'+ts+'_'+bi,
+        type:'mc',
+        diff:getDiff(bi,blocks.length),
+        text:questionText,
+        box:boxLines.length?boxLines.join(' '):null,
+        opts:opts,
+        answer:Math.min(answerIdx,opts.length-1),
+        keywords:[],
+        scoreType:'exact',
+        exp:expLines.join(' ')||''
+      });
+    } else {
+      var kws=kwLines.length?kwLines.join(',').split(',').map(function(s){return s.trim();}).filter(function(s){return s.length>0;})
+                           :(answerLines.length?[answerLines[0]]:[]);
+      questions.push({
+        id:'uq_'+Date.now()+'_'+bi,
+        type:'subj',
+        diff:getDiff(bi,blocks.length),
+        text:questionText,
+        box:boxLines.length?boxLines.join(' '):null,
+        opts:[],
+        answer:0,
+        keywords:kws,
+        scoreType:kws.length?'keyword':'ai',
+        exp:(answerLines.join(' ')+' '+expLines.join(' ')).trim()||''
+      });
+    }
+  }
+  return questions;
+}
+
+function getDiff(idx,total){
+  var r=idx/total;
+  if(r<0.5) return '상';
+  if(r<0.83) return '중';
+  return '하';
+}
 function showParsePreview(){
   const pp=document.getElementById('parse-preview');pp.classList.add('show');
   document.getElementById('pp-count').textContent=parsedQuestions.length;
-  document.getElementById('upload-quiz-form').style.display='block';
-  document.getElementById('btn-save-upload').style.display='block';
-  document.getElementById('upload-action-btns').style.display='none';
   const list=document.getElementById('pp-list');list.innerHTML='';
   parsedQuestions.forEach((q,i)=>{
     const d=document.createElement('div');d.className='pp-item';
@@ -3128,8 +3190,6 @@ async function saveUploadedQuiz(){
   document.getElementById('paste-input').value='';
   document.getElementById('parse-preview').classList.remove('show');
   document.getElementById('upload-quiz-form').style.display='none';
-  document.getElementById('upload-action-btns').style.display='flex';
-  document.getElementById('btn-save-upload').style.display='none';
   parsedQuestions=[];
   switchTab('tab-quizzes',document.querySelector('.tab-btn'));
 }

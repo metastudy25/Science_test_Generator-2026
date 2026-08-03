@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>이든X학원 로그인</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Nanum Gothic',sans-serif;min-height:100vh;background:linear-gradient(135deg,#1a2b4a 0%,#0d3d5a 55%,#0d5a3d 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
+.logo{font-size:11px;font-weight:800;letter-spacing:5px;color:#f0a500;text-transform:uppercase;margin-bottom:10px}
+.title{font-size:clamp(24px,5vw,36px);font-weight:900;color:#fff;margin-bottom:4px;text-align:center}
+.sub{font-size:13px;color:#8ab4c9;margin-bottom:32px;text-align:center}
+.box{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:30px 32px;width:100%;max-width:420px;backdrop-filter:blur(10px);margin-bottom:14px}
+.box h3{color:#fff;font-size:15px;font-weight:800;margin-bottom:20px}
+.row{margin-bottom:14px}
+.row label{display:block;font-size:10px;font-weight:800;color:#f0a500;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.row input{width:100%;padding:11px 14px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:9px;color:#fff;font-size:14px;outline:none;transition:border .2s;font-family:inherit}
+.row input::placeholder{color:rgba(255,255,255,.35)}
+.row input:focus{border-color:#f0a500}
+.err{color:#ff8a8a;font-size:12px;min-height:18px;margin-top:6px}
+.btn{width:100%;padding:13px;border:none;border-radius:9px;font-size:14px;font-weight:800;cursor:pointer;transition:all .18s;margin-top:6px;letter-spacing:.3px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.btn-gold{background:linear-gradient(135deg,#f0a500,#d48c00);color:#1a1200}
+.btn-navy{background:linear-gradient(135deg,#1a2b4a,#0d1f35);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.div{display:flex;align-items:center;gap:10px;margin:18px 0}
+.div span{flex:1;height:1px;background:rgba(255,255,255,.15)}
+.div p{font-size:11px;color:rgba(255,255,255,.4);white-space:nowrap}
+.toggle{color:rgba(255,255,255,.45);font-size:12px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px}
+.toggle:hover{color:#f0a500}
+.toggle::before,.toggle::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.15)}
+</style>
+</head>
+<body>
+<div class="logo">🌿 이든X학원</div>
+<div class="title">문제풀기 시스템</div>
+<div class="sub">Eden Quiz Platform · 2026</div>
+
+<!-- 학생 로그인 -->
+<div class="box">
+  <h3>🎓 학생 로그인</h3>
+  <div class="row"><label>이름</label><input id="s-name" type="text" placeholder="이름 입력" autocomplete="off" onkeydown="if(event.key==='Enter')loginStudent()"></div>
+  <div class="row"><label>비밀번호</label><input id="s-pw" type="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')loginStudent()"></div>
+  <div class="err" id="s-err"></div>
+  <button class="btn btn-gold" onclick="loginStudent()">로그인</button>
+  <div class="div"><span></span><p>관리자</p><span></span></div>
+  <div class="toggle" onclick="toggleAdmin()">🔐 관리자 로그인</div>
+</div>
+
+<!-- 관리자 로그인 -->
+<div class="box" id="admin-box" style="display:none">
+  <h3>🔐 관리자 로그인</h3>
+  <div class="row"><label>아이디</label><input id="a-id" type="text" placeholder="아이디" autocomplete="off" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
+  <div class="row"><label>비밀번호</label><input id="a-pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
+  <div class="err" id="a-err"></div>
+  <button class="btn btn-navy" onclick="loginAdmin()">관리자 로그인</button>
+</div>
+
+<script>
+/* ── 스토리지 ── */
+function sGet(k){try{return JSON.parse(localStorage.getItem(k));}catch{return null;}}
+function sSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+const DEF_STUDENTS = [{"name": "권다은", "pw": "129200"}, {"name": "김민정", "pw": "837500"}, {"name": "김민지", "pw": "837501"}, {"name": "김유성", "pw": "505600"}, {"name": "박민균", "pw": "499500"}, {"name": "박준혁", "pw": "283700"}, {"name": "박준혁(H)", "pw": "141600"}, {"name": "박채영", "pw": "305500"}, {"name": "손은지", "pw": "790500"}, {"name": "손지예", "pw": "149700"}, {"name": "신윤혁", "pw": "655900"}, {"name": "심우진", "pw": "400700"}, {"name": "이성현", "pw": "780900"}, {"name": "이수연", "pw": "095400"}, {"name": "이승찬", "pw": "005100"}, {"name": "이윤재", "pw": "951100"}, {"name": "이재훈", "pw": "095400"}, {"name": "이주형", "pw": "005101"}, {"name": "조승훈", "pw": "144300"}, {"name": "조여은류나", "pw": "988000"}, {"name": "황혜암", "pw": "281700"}];
+
+function getStudents(){
+  let s=sGet('eden_students');
+  if(!s||!s.length){s=DEF_STUDENTS;sSet('eden_students',s);}
+  return s;
+}
+
+function toggleAdmin(){
+  const b=document.getElementById('admin-box');
+  b.style.display=b.style.display==='none'?'block':'none';
+}
+
+function loginStudent(){
+  const name=document.getElementById('s-name').value.trim();
+  const pw=document.getElementById('s-pw').value.trim();
+  if(!name||!pw){document.getElementById('s-err').textContent='이름과 비밀번호를 입력하세요.';return;}
+  const s=getStudents();
+  const found=s.find(x=>x.name===name&&String(x.pw)===String(pw));
+  if(!found){document.getElementById('s-err').textContent='이름 또는 비밀번호가 올바르지 않습니다.';return;}
+  sSet('eden_session',{name,role:'student',time:Date.now()});
+  location.href='quiz.html';
+}
+
+function loginAdmin(){
+  const id=document.getElementById('a-id').value.trim();
+  const pw=document.getElementById('a-pw').value.trim();
+  if(id==='eden'&&pw==='eden2026'){
+    sSet('eden_session',{name:'관리자',role:'admin',time:Date.now()});
+    location.href='quiz.html';
+  } else {
+    document.getElementById('a-err').textContent='아이디 또는 비밀번호가 올바르지 않습니다.';
+  }
+}
+
+/* 이미 로그인 상태면 바로 이동 */
+const sess=sGet('eden_session');
+if(sess&&sess.time&&(Date.now()-sess.time)<86400000) location.href='quiz.html';
+</script>
+</body>
+</html>

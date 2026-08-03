@@ -2445,10 +2445,37 @@ const DEMO_QUIZZES = [
   }
 ];
 
-/* ━━━━ STORAGE ━━━━ */
+/* ━━━━ STORAGE (window.storage + localStorage 듀얼 폴백) ━━━━ */
 const SK={STUDENTS:'eden_students',QUIZZES:'eden_quizzes',SCORES:'eden_scores'};
-async function sGet(k){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):null;}catch{return null;}}
-async function sSet(k,v){try{await window.storage.set(k,JSON.stringify(v));}catch(e){console.error(e);}}
+
+/* 스토리지 엔진 감지 */
+function hasWindowStorage(){
+  try{ return !!(window.storage && typeof window.storage.get==='function'); }catch{ return false; }
+}
+
+/* GET: window.storage 우선 → localStorage 폴백 */
+async function sGet(k){
+  if(hasWindowStorage()){
+    try{
+      const r=await window.storage.get(k);
+      if(r && r.value!=null) return JSON.parse(r.value);
+    }catch{}
+  }
+  /* localStorage 폴백 */
+  try{
+    const v=localStorage.getItem(k);
+    return v!=null ? JSON.parse(v) : null;
+  }catch{ return null; }
+}
+
+/* SET: window.storage + localStorage 동시 저장 */
+async function sSet(k,v){
+  const str=JSON.stringify(v);
+  if(hasWindowStorage()){
+    try{ await window.storage.set(k,str); }catch{}
+  }
+  try{ localStorage.setItem(k,str); }catch{}
+}
 
 const DEF_STUDENTS=[
   {name:'권다은',pw:'129200'},{name:'김민정',pw:'837500'},{name:'김민지',pw:'837501'},
@@ -2459,9 +2486,37 @@ const DEF_STUDENTS=[
   {name:'이윤재',pw:'951100'},{name:'이재훈',pw:'095400'},{name:'이주형',pw:'005101'},
   {name:'조승훈',pw:'144300'},{name:'조여은류나',pw:'988000'},{name:'황혜암',pw:'281700'}
 ];
-async function getStudents(){let s=await sGet(SK.STUDENTS);if(!s){s=DEF_STUDENTS;await sSet(SK.STUDENTS,s);}return s;}
-async function getQuizzes(){let q=await sGet(SK.QUIZZES);if(!q){q=DEMO_QUIZZES;await sSet(SK.QUIZZES,q);}return q;}
-async function getScores(){let s=await sGet(SK.SCORES);if(!s){s=[];await sSet(SK.SCORES,s);}return s;}
+async function getStudents(){
+  let s=await sGet(SK.STUDENTS);
+  if(!s||!s.length){ s=DEF_STUDENTS; await sSet(SK.STUDENTS,s); }
+  return s;
+}
+async function getQuizzes(){
+  let q=await sGet(SK.QUIZZES);
+  /* 없거나 빈 배열이면 기본 2개 세팅 */
+  if(!q||!q.length){
+    q=DEMO_QUIZZES;
+    await sSet(SK.QUIZZES,q);
+    return q;
+  }
+  /* 구버전: quiz_science_60만 있고 quiz_circulation_60이 없으면 자동 추가 */
+  const hasCirc=q.some(x=>x.id==='quiz_circulation_60');
+  const hasSci =q.some(x=>x.id==='quiz_science_60');
+  if(!hasCirc){
+    q.push(DEMO_QUIZZES.find(x=>x.id==='quiz_circulation_60'));
+    await sSet(SK.QUIZZES,q);
+  }
+  if(!hasSci){
+    q.unshift(DEMO_QUIZZES.find(x=>x.id==='quiz_science_60'));
+    await sSet(SK.QUIZZES,q);
+  }
+  return q;
+}
+async function getScores(){
+  let s=await sGet(SK.SCORES);
+  if(!s){ s=[]; await sSet(SK.SCORES,s); }
+  return s;
+}
 async function addScore(e){const s=await getScores();s.push(e);await sSet(SK.SCORES,s);}
 
 /* ━━━━ AUTH ━━━━ */
